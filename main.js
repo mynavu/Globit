@@ -1,6 +1,6 @@
 if (window.location.pathname.includes("index.html")) {
 
-/*
+
 const indexedDB = window.indexedDB ||
 window.mozIndexedDF ||
 window.webkitIndexedDB ||
@@ -8,7 +8,6 @@ window.msIndexedDB ||
 window.shimIndexedDB;
 
 let db;
-
 const request = indexedDB.open("GeoJSONImagesDB", 1);
 
 request.onupgradeneeded = function (event) {
@@ -18,18 +17,15 @@ request.onupgradeneeded = function (event) {
         }
         console.log("Database setup complete.");
 };
-
 request.onsuccess = function (event) {
     console.log("IndexedDB opened successfully!");
     db = event.target.result;
     // Now you can save images to this database
 };
-
 request.onerror = function (event) {
     console.error("Error opening IndexedDB:", event.target.errorCode);
 };
 
-*/
 mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw';
 
 //https://api.mapbox.com/search/geocode/v6/reverse?longitude=50&latitude=50&language=en&access_token=pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw
@@ -160,16 +156,12 @@ map.on('mouseleave', 'points-layer', () => {
     }
 });
 
-
-// ADD A POINT TO THE MAP
-// Enable adding points
 function enablePointAdding() {
     map.getCanvas().style.cursor = 'pointer';
     text.style.display = 'block';
     map.on('click', addPoint);
 }
 
-// Disable adding points
 function disablePointAdding() {
     map.getCanvas().style.cursor = '';
     text.style.display = 'none';
@@ -296,6 +288,7 @@ function stampNotify(stamp) {
     }, 8000)
 };
 
+/*
 function addPoint(e) {
     let description = "";
     let location = "";
@@ -418,8 +411,9 @@ function addPoint(e) {
         button.style.display = 'block';
     });
 }
+*/
 
-/*
+
 function addPoint(e) {
     let description = "";
     let location = "";
@@ -510,7 +504,6 @@ function addPoint(e) {
     // Make the entry box appear and the exit button
     exitButton.style.display = 'block';
 
-    // Remove old listeners and add a fresh one
     newSubmitButton.addEventListener('click', function () {
         // Update the latest input for the image and the description
         description = document.querySelector('input[name="description"]').value;
@@ -531,10 +524,10 @@ function addPoint(e) {
                 } else {
                     console.error("Database not ready yet.");
                 }
-
                 lastFeature.properties.image = null;
                 map.getSource('points').setData(geojson);
-                localStorage.setItem("geojson", JSON.stringify(geojson));
+                localStorage.setItem('value', JSON.stringify(geojson));
+                localStorage.setItem('idCount', JSON.stringify(pointId));
                 receiveStamp(lastFeature.properties.location);
                 updateNumberOfCountries();
 
@@ -552,55 +545,69 @@ function addPoint(e) {
         button.style.display = 'block';
     });
 }
-*/
+
 
 function editPoint(index) {
     const feature = geojson.features[index];
     if (!feature) return;
-    document.querySelector('input[name="description"]').value = feature.properties.description;
-    button.style.display = 'none';
 
-    // Update the image preview with the stored image data
-    imagePreview.src = feature.properties.image; // Base64 or image URL
-    entry.showModal();
-    imagePreview.style.display = 'block';
+    const transaction = db.transaction("images", "readonly");
+    const store = transaction.objectStore("images");
+    const getRequest = store.get(feature.id);
 
-    // Reset file input
-    imageInput.value = '';
-
-    // Update on submit
-    replaceSubmitButton();
-    const newSubmitButton = document.getElementById('submitButton');
-    newSubmitButton.addEventListener('click', function () {
-        const newDescription = document.querySelector('input[name="description"]').value;
-        button.style.display = 'block';
-
-        // Update description
-        if (newDescription) {
-            feature.properties.description = newDescription;
+    getRequest.onsuccess = function () {
+        const imageBlob = getRequest.result?.data; // Access result only after onsuccess
+        if (imageBlob) {
+            imagePreview.src = imageBlob;
+            imagePreview.style.display = 'block';
         }
 
-        // Check if a new file was uploaded, usually it will be cleared and empty
-        const file = imageInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                feature.properties.image = e.target.result; // Base64 image data
-                map.getSource('points').setData(geojson); // Update GeoJSON source
-                localStorage.setItem('value', JSON.stringify(geojson));
+        // Populate description field
+        document.querySelector('input[name="description"]').value = feature.properties.description || "";
+        button.style.display = 'none';
 
+        entry.showModal();
 
-            };
-            reader.readAsDataURL(file);
-        } else {
-            // If no new file, just update the GeoJSON with the existing data
-            map.getSource('points').setData(geojson);
-        }
-        localStorage.setItem('value', JSON.stringify(geojson));
+        // Reset file input
+        imageInput.value = '';
 
-        entry.close(); // Hide edit form
-        imagePreview.style.display = 'none'; // Hide image preview
-    });
+        // Update on submit
+        replaceSubmitButton();
+        const newSubmitButton = document.getElementById('submitButton');
+        newSubmitButton.addEventListener('click', function () {
+            const newDescription = document.querySelector('input[name="description"]').value;
+            button.style.display = 'block';
+
+            // Update description
+            if (newDescription) {
+                feature.properties.description = newDescription;
+            }
+
+            // Check if a new file was uploaded
+            const file = imageInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const newImageBlob = e.target.result;
+                    const writeTransaction = db.transaction("images", "readwrite");
+                    const writeStore = writeTransaction.objectStore("images");
+                    writeStore.put({ id: feature.id, data: newImageBlob });
+                    localStorage.setItem('value', JSON.stringify(geojson));
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // If no new file, just update the GeoJSON
+                map.getSource('points').setData(geojson);
+            }
+
+            localStorage.setItem('value', JSON.stringify(geojson));
+            entry.close(); // Hide edit form
+            imagePreview.style.display = 'none'; // Hide image preview
+        });
+    };
+    getRequest.onerror = function () {
+        console.error(`Failed to retrieve image for Feature ID: ${feature.id}`);
+    };
 }
 
 
@@ -610,17 +617,16 @@ button.addEventListener('click', function () {
     enablePointAdding();
 });
 
-
 imageInput.addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
+        reader.readAsDataURL(file); // Convert file to base64 string
         reader.onload = function (e) {
             imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
 
         };
-        reader.readAsDataURL(file); // Convert file to base64 string
     }
 });
 
@@ -660,72 +666,80 @@ e looks like {
                  "target": map,    // The map object itself
                  "originalEvent": { ... } // Raw browser event data
              }
-
 */
-
 
 map.on('click', 'points-layer', function(e) {
     if (text.style.display !== 'block') {
-    const coordinates = e.lngLat;
-    const feature = e.features[0];
-    console.log('Feature ID:', feature.id);
-    console.log('Feature:', feature);
+        const coordinates = e.lngLat;
+        const feature = e.features[0];
+        console.log('Feature ID:', feature.id);
+        console.log('Feature:', feature);
 
-    const featureIndex = geojson.features.findIndex(f => f.id === feature.id);
-    const location = feature.properties.location;
-    const description = feature.properties.description || "No description";
-    const image = feature.properties.image
-        ? `<img src="${feature.properties.image}" style="width: 200px; display: block; " />`
-        : "No image uploaded";
+        const featureIndex = geojson.features.findIndex(f => f.id === feature.id);
+        const transaction = db.transaction("images", "readonly");
+        const store = transaction.objectStore("images");
+        const getRequest = store.get(feature.id);
+        let image;
+        getRequest.onsuccess = function () {
+                const imageBlob = getRequest.result?.data;
+                if (imageBlob) {
+                    console.log(`Image loaded for Feature ID: ${feature.id}`);
+                    image = `<img src="${imageBlob}" style="width: 200px; display: block; " />`
+                    const location = feature.properties.location;
+                            const description = feature.properties.description || "No description";
 
-    // Remove previous click popup
-    if (clickPopup) {
-        clickPopup.remove();
-    }
+                            // Remove previous click popup
+                            if (clickPopup) {
+                                clickPopup.remove();
+                            }
 
-    // Create new click popup
-    clickPopup = new mapboxgl.Popup()
-        .setLngLat(coordinates)
-        .setHTML(`
-            <div class="popup">
+                            // Create new click popup
+                            clickPopup = new mapboxgl.Popup()
+                                .setLngLat(coordinates)
+                                .setHTML(`
+                                    <div class="popup">
 
-                <p class="location_description margin">📍<i>${location}</i></p>
-                ${image}
-                <p class="location_description">${description}</p>
-                <div class="container-delete">
-                    <button id="edit-btn-${featureIndex}" class="edit-btn">Edit <i class="bi bi-pen-fill"></i></button>
-                </div>
-                <div class="container-delete">
-                    <button id="delete-btn-${featureIndex}" class="delete-btn">Delete <i class="bi bi-trash-fill"></i> </button>
-                </div>
-            </div>
-        `)
-        .addTo(map);
+                                        <p class="location_description margin">📍<i>${location}</i></p>
+                                        ${image}
+                                        <p class="location_description">${description}</p>
+                                        <div class="container-delete">
+                                            <button id="edit-btn-${featureIndex}" class="edit-btn">Edit <i class="bi bi-pen-fill"></i></button>
+                                        </div>
+                                        <div class="container-delete">
+                                            <button id="delete-btn-${featureIndex}" class="delete-btn">Delete <i class="bi bi-trash-fill"></i> </button>
+                                        </div>
+                                    </div>
+                                `)
+                                .addTo(map);
 
-    // Add event listeners for the buttons
-    setTimeout(() => {
-        // Ensure the DOM has rendered before adding listeners
-        document.getElementById(`edit-btn-${featureIndex}`).addEventListener('click', () => {
-            replaceSubmitButton();
-            console.log(featureIndex);
-            const newSubmitButton = document.getElementById('submitButton');
-            newSubmitButton.innerText = 'Edit';
+                            // Add event listeners for the buttons
+                            setTimeout(() => {
+                                // Ensure the DOM has rendered before adding listeners
+                                document.getElementById(`edit-btn-${featureIndex}`).addEventListener('click', () => {
+                                    replaceSubmitButton();
+                                    console.log(featureIndex);
+                                    const newSubmitButton = document.getElementById('submitButton');
+                                    newSubmitButton.innerText = 'Edit';
 
-            editPoint(featureIndex);
-            exitButton.style.display = 'none';
-        });
-        document.getElementById(`delete-btn-${featureIndex}`).addEventListener('click', () => {
-            deletePoint(featureIndex);
-            clickPopup.remove(); // Close popup after deleting
-            updateNumberOfPosts();
-        });
-    }, 100); // Short delay to ensure DOM availability
-    clickPopup.on('close', () => {
-            clickPopup = null; // Cleanup the reference
-        });
+                                    editPoint(featureIndex);
+                                    exitButton.style.display = 'none';
+                                });
+                                document.getElementById(`delete-btn-${featureIndex}`).addEventListener('click', () => {
+                                    deletePoint(featureIndex);
+                                    clickPopup.remove(); // Close popup after deleting
+                                    updateNumberOfPosts();
+                                });
+                            }, 100); // Short delay to ensure DOM availability
+                            clickPopup.on('close', () => {
+                                    clickPopup = null; // Cleanup the reference
+                                });
+                } else {
+                    console.warn(`No image found for Feature ID: ${feature.id}`);
+                            image = `<p>No image available</p>`;
+                }
+            };
     }
 });
-
 
 const confirmCloseButton = document.getElementById('confirmCloseButton')
 
@@ -1128,8 +1142,6 @@ let stampList = [];
       });
 
 
-
-
 }
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
@@ -1175,11 +1187,8 @@ const imgDisplay = document.querySelector(".imgDisplay");
 const descriptionDisplay = document.querySelector(".descriptionDisplay");
 const locationDisplay = document.querySelector(".locationDisplay");
 const mainbar2 = document.querySelector(".mainbar2");
-
-
-
-      document.addEventListener('DOMContentLoaded', () => {
-          if (storedCountries) {
+document.addEventListener('DOMContentLoaded', () => {
+if (storedCountries) {
               let countriesPost = JSON.parse(storedCountries);
               if (countriesPost.length > 0) {
                   const maxCountry = countriesPost.reduce((maxObj, currentObj) => (currentObj.count > maxObj.count ? currentObj : maxObj), countriesPost[0]);
@@ -1216,33 +1225,84 @@ const mainbar2 = document.querySelector(".mainbar2");
               console.log("Stamp list length",stampList.length);
               const postReminder = document.querySelector(".postReminder");
 
-          if (storedGeojson) {
+
+
+    const indexedDB = window.indexedDB ||
+        window.mozIndexedDB ||
+        window.webkitIndexedDB ||
+        window.msIndexedDB ||
+        window.shimIndexedDB;
+
+    const request = indexedDB.open("GeoJSONImagesDB", 1);
+    let db;
+
+    // IndexedDB setup
+    request.onupgradeneeded = function (event) {
+        db = event.target.result;
+        if (!db.objectStoreNames.contains("images")) {
+            db.createObjectStore("images", { keyPath: "id" }); // Create object store
+        }
+        console.log("Database setup complete.");
+    };
+
+    // Open IndexedDB and initialize db
+    request.onsuccess = async function (event) {
+        db = event.target.result; // Initialize db after success
+
+        // Now proceed with processing storedGeojson
+        if (storedGeojson) {
             let geojson = JSON.parse(storedGeojson);
             postsNumber.innerText = geojson.features.length;
             console.log(geojson);
+            const postReminder = document.querySelector(".postReminder");
+
             if (geojson.features.length > 0) {
                 postReminder.style.display = "none";
-                geojson.features.forEach((feature) => {
-                    const HTMLString = `
-                    <div class="post">
-                        <div class="profileDisplay">
-                                <img class="pfp2" src="earth_pfp.png">
-                                <h4 class="username2">Guest</h4>
-                                <h5 class="locationDisplay average">${feature.properties.location}</h5>
-                            </div>
-                            <img class="imgDisplay" src="${feature.properties.image}">
-                            <h5 class="descriptionDisplay average">${feature.properties.description}
-                            </h5>
-                        </div>
-                    `;
-                    mainbar2.insertAdjacentHTML("beforeend", HTMLString);
 
-                })
+                // Process posts in order
+                for (const feature of geojson.features) {
+                    await new Promise((resolve) => {
+                        const transaction = db.transaction("images", "readonly");
+                        const store = transaction.objectStore("images");
+                        const getRequest = store.get(feature.id);
+
+                        getRequest.onsuccess = function () {
+                            const imageBlob = getRequest.result?.data; // Access result only after onsuccess
+                            if (imageBlob) {
+                                const HTMLString = `
+                                <div class="post">
+                                    <div class="profileDisplay">
+                                        <img class="pfp2" src="earth_pfp.png">
+                                        <h4 class="username2">Guest</h4>
+                                        <h5 class="locationDisplay average">${feature.properties.location}</h5>
+                                    </div>
+                                    <img class="imgDisplay" src="${imageBlob}">
+                                    <h5 class="descriptionDisplay average">${feature.properties.description}</h5>
+                                </div>
+                                `;
+                                mainbar2.insertAdjacentHTML("beforeend", HTMLString);
+                            }
+                            resolve(); // Resolve the promise to continue the loop
+                        };
+
+                        getRequest.onerror = function () {
+                            console.error(`Error retrieving data for feature ID ${feature.id}`);
+                            resolve(); // Resolve even if there's an error
+                        };
+                    });
+                }
             } else {
                 postReminder.style.display = "block";
             }
-          }
-      });
+        }
+    };
+
+    request.onerror = function (event) {
+        console.error("Error opening IndexedDB:", event.target.errorCode);
+    };
+});
+
+
 
       const settingsButton = document.querySelector('.menuFriend');
       const customization = document.querySelector('.customization');
@@ -1297,10 +1357,6 @@ const mainbar2 = document.querySelector(".mainbar2");
             backgroundColor.style.background = "linear-gradient(white 20%, var(--blue) 50%)";
         }
     });
-
-
-
-
 }
 
 // https://www.lonelyplanet.com/north-korea
