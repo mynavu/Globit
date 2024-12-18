@@ -3,6 +3,20 @@ import { matchList } from './matchList.js';
 
 console.log("Current path:", window.location.pathname); // Log current path to check the pathname
 
+if (!window.location.pathname.endsWith('.html')) {
+  // Check for specific page paths and redirect to respective .html pages
+  if (window.location.pathname === '/') {
+    window.location.pathname = '/index.html';
+  } else if (window.location.pathname === '/home') {
+    window.location.pathname = '/home.html';
+  } else if (window.location.pathname === '/stamps') {
+    window.location.pathname = '/stamps.html';
+  } else {
+    // You can add more cases for other pages here
+    window.location.pathname = '/index.html';
+  }
+}
+
 
 if (window.location.pathname.includes("index.html")) {
 
