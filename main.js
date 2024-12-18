@@ -2,7 +2,7 @@ import { totalStamps } from './totalStamps.js';
 import { matchList } from './matchList.js';
 
 console.log("Current path:", window.location.pathname); // Log current path to check the pathname
-
+/*
 if (!window.location.pathname.endsWith('.html')) {
   // Check for specific page paths and redirect to respective .html pages
   if (window.location.pathname === '/') {
@@ -16,7 +16,7 @@ if (!window.location.pathname.endsWith('.html')) {
     window.location.pathname = '/index.html';
   }
 }
-
+*/
 
 if (window.location.pathname.includes("index.html")) {
 
