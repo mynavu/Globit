@@ -1,5 +1,7 @@
-if (window.location.pathname.includes("index.html")) {
+import { totalStamps } from './totalStamps.js';
+import { matchList } from './matchList.js';
 
+if (window.location.pathname.includes("index.html")) {
 
 const indexedDB = window.indexedDB ||
 window.mozIndexedDF ||
@@ -13,22 +15,24 @@ const request = indexedDB.open("GeoJSONImagesDB", 1);
 request.onupgradeneeded = function (event) {
     db = event.target.result;
     if (!db.objectStoreNames.contains("images")) {
-            db.createObjectStore("images", { keyPath: "id" }); // Key is the Feature ID
+            db.createObjectStore("images", { keyPath: "id" });
         }
         console.log("Database setup complete.");
 };
+
 request.onsuccess = function (event) {
-    console.log("IndexedDB opened successfully!");
     db = event.target.result;
-    // Now you can save images to this database
 };
+
 request.onerror = function (event) {
     console.error("Error opening IndexedDB:", event.target.errorCode);
 };
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw';
 
+//TEST REVERSE GEOCODING
 //https://api.mapbox.com/search/geocode/v6/reverse?longitude=50&latitude=50&language=en&access_token=pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw
+
 const submitButton = document.getElementById('submitButton');
 
 let map = new mapboxgl.Map({
@@ -50,17 +54,12 @@ let geojson = {
 let pointId = 0;
 let countriesPost = [];
 let stampList = [];
-
 //localStorage.clear();
 const storedId = localStorage.getItem('idCount');
 const storedGeojson = localStorage.getItem('value');
-//localStorage.removeItem('countries_stored');
 const storedCountries = localStorage.getItem('countries_stored');
-//localStorage.removeItem('stamps_stored');
 const storedStamps = localStorage.getItem('stamps_stored');
 const savedState = localStorage.getItem('checkboxState');
-
-
 
 if (storedGeojson) {
     geojson = JSON.parse(storedGeojson);
@@ -71,7 +70,6 @@ if (storedId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
     if (storedCountries) {
         countriesPost = JSON.parse(storedCountries);
     }
@@ -82,38 +80,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-map.on('load', () => {
-    // Add GeoJSON source for points (only once)
-    map.addSource('points', {
-        type: 'geojson',
-        data: geojson
-    });
-
-    // Load and add custom icon for points
-    map.loadImage('./pointer.png', (error, image) => {
-        if (error) throw error;
-        map.addImage('custom-pointer', image);
-        // Add layer for custom marker points
-        map.addLayer({
-            id: 'points-layer',
-            type: 'symbol',
-            source: 'points',
-            layout: {
-                'icon-image': 'custom-pointer', // Custom marker from above
-                'icon-size': 0.07,
-                'icon-allow-overlap': true,
-                'icon-offset': [0, -280]
-            }
+// Function to add GeoJSON source and layer for points
+function addPointsLayer(map, geojson) {
+    // Check if the source already exists to avoid errors
+    if (!map.getSource('points')) {
+        map.addSource('points', {
+            type: 'geojson',
+            data: geojson
         });
-    });
+    }
+    // Check if the layer already exists to avoid duplication
+    if (!map.getLayer('points-layer')) {
+        map.loadImage('./pointer.png', (error, image) => {
+            if (error) throw error;
+            if (!map.hasImage('custom-pointer')) {
+                map.addImage('custom-pointer', image);
+            }
+            map.addLayer({
+                id: 'points-layer',
+                type: 'symbol',
+                source: 'points',
+                layout: {
+                    'icon-image': 'custom-pointer',
+                    'icon-size': 0.07,
+                    'icon-allow-overlap': true,
+                    'icon-offset': [0, -280]
+                }
+            });
+        });
+    }
+}
+
+// Add points when the map initially loads and re-add points whenever the style is reloaded
+map.on('load', () => {
+    addPointsLayer(map, geojson);
+});
+map.on('style.load', () => {
+    addPointsLayer(map, geojson);
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
+
 function updateNumberOfPosts() {
     numberOfPosts.innerHTML = `Posts: ${geojson.features.length}`;
 }
 updateNumberOfPosts();
-
 
 let hoverPopup = null;
 let clickPopup = null;
@@ -144,14 +155,11 @@ map.on('mouseleave', 'points-layer', () => {
     if (text.style.display !== 'block') {
     map.getCanvas().style.cursor = '';}
     if (hoverPopup) {
-        // Apply the fade-out effect using CSS
         hoverPopup.getElement().style.transition = "opacity 1s ease-out";
         hoverPopup.getElement().style.opacity = 0;
-
-        // Remove the popup after the fade-out duration (1 second)
         setTimeout(() => {
-            hoverPopup.remove(); // Remove the popup from the map
-            hoverPopup = null;   // Reset the popup variable
+            hoverPopup.remove();
+            hoverPopup = null;
         }, 50);
     }
 });
@@ -168,9 +176,7 @@ function disablePointAdding() {
     map.off('click', addPoint);
 }
 
-
 const numberOfCountries = document.querySelector('.numberOfCountries');
-
 function updateNumberOfCountries() {
     numberOfCountries.innerHTML = `Countries Visited: ${countriesPost.length}`;
     localStorage.setItem('countries_stored', JSON.stringify(countriesPost));
@@ -180,15 +186,11 @@ function updateNumberOfCountries() {
 function deletePoint(index) {
     const featureToDelete = geojson.features[index];
     const deletedCountry = featureToDelete.properties.country;
-
-    // Remove the feature from geojson
     geojson.features.splice(index, 1);
-
     // Update countriesPost
     const deletedIndex = countriesPost.findIndex(country => country.name === deletedCountry);
     if (deletedIndex !== -1) {
         countriesPost[deletedIndex].count -= 1;
-        // Remove country if count is zero
         if (countriesPost[deletedIndex].count === 0) {
             countriesPost.splice(deletedIndex, 1);
         }
@@ -211,44 +213,6 @@ const replaceSubmitButton = () => {
     const submitButton = document.getElementById('submitButton');
     submitButton.replaceWith(submitButton.cloneNode(true)); // Remove old listeners
 }
-
-
-// REGULAR EXPRESSIONS FOR STAMPS
-const matchList = [{regex : /(?:Washington)(?:.*United States)/i , stamp : "Washington"},
-{regex : /(?:Tokyo)(?:.*Japan)/i , stamp : "Tokyo"},
-{regex : /(?:Seoul)(?:.*Korea)/i , stamp : "Seoul"},
-{regex : /(?:Vancouver)(?:.*Canada)/i , stamp : "Vancouver"},
-{regex : /(?:Moscow)(?:.*Russia)/i , stamp : "Moscow"},
-{regex : /(?:Paris)(?:.*France)/i , stamp : "Paris"},
-{regex : /(?:Cape)(?:.*South Africa)/i , stamp : "Cape_Town"},
-{regex : /(?:Rome)(?:.*Italy)/i , stamp : "Rome"},
-{regex : /(?:Oaxaca)(?:.*Mexico)/i , stamp : "Oaxaca"},
-{regex : /(?:Cappadocia)(?:.*Turkey)/i , stamp : "Cappadocia"},
-{regex : /(?:Chefchaouen)(?:.*Morocco)/i , stamp : "Chefchaouen"},
-{regex : /(?:Amsterdam)(?:.*Netherlands)/i , stamp : "Amsterdam"},
-{regex : /(?:Barcelona)(?:.*Spain)/i , stamp : "Barcelona"},
-{regex : /(?:Beijing)(?:.*China)/i , stamp : "Beijing"},
-{regex : /(?:Cairo)(?:.*Egypt)/i , stamp : "Cairo"},
-{regex : /(?:Cartagena)(?:.*Colombia)/i , stamp : "Cartagena"},
-{regex : /(?:(E|É)vora)(?:.*Portugal)/i , stamp : "Evora"},
-{regex : /(?:Hawaii)(?:.*United States)/i , stamp : "Hawaii"},
-{regex : /(?:Jerusalem)(?:.*Israel)/i , stamp : "Jerusalem"},
-{regex : /(?:London)(?:.*England)/i , stamp : "London"},
-{regex : /(?:Los Angeles)(?:.*United States)/i , stamp : "Los_Angeles"},
-{regex : /(?:Naples)(?:.*Italy)/i , stamp : "Naples"},
-{regex : /(?:New York)(?:.*United States)/i , stamp : "New_York"},
-{regex : /(?:Paris)(?:.*France)/i , stamp : "Paris"},
-{regex : /(?:Port Louis)(?:.*Mauritius)/i , stamp : "Port_Louis"},
-{regex : /(?:Singapore)/i , stamp : "Singapore"},
-{regex : /(?:Oia)(?:.*Greece)/i , stamp : "Santorini"},
-{regex : /(?:Sydney)(?:.*Australia)/i , stamp : "Sydney"},
-{regex : /(?:Nuuk)(?:.*Greenland)/i , stamp : "Nuuk"},
-{regex : /(?:Bordeaux)(?:.*France)/i , stamp : "Bordeaux"},
-{regex : /(?:Christchurch)(?:.*New Zealand)/i , stamp : "Christchurch"},
-{regex : /(?:Havana)(?:.*Cuba)/i , stamp : "Havana"},
-{regex : /(?:Istanbul)(?:.*(Turkey|Türkiye))/i , stamp : "Istanbul"},
-{regex : /(?:Hamburg)(?:.*Germany)/i , stamp : "Hamburg"},
-{regex : /(?:Hong Kong)/i , stamp : "Hong_Kong"}];
 
 function receiveStamp(location) {
     console.log("Location:", location);
@@ -288,7 +252,6 @@ function stampNotify(stamp) {
     }, 8000)
 };
 
-/*
 function addPoint(e) {
     let description = "";
     let location = "";
@@ -314,6 +277,8 @@ function addPoint(e) {
         }
         console.log(data.features);
         location = data.features[indexLocation].properties.full_address;
+        console.log("location", location);
+        console.log("coordinates", coordinates);
         countryName = data.features[indexLocation].properties.context.country.name;
         console.log("countryName", countryName);
         const newFeature = {
@@ -324,7 +289,6 @@ function addPoint(e) {
                 },
                 "properties": {
                     "description": "",
-                    "image": null,
                     "country": countryName,
                     "location": location
                 },
@@ -342,8 +306,6 @@ function addPoint(e) {
                       countriesPost[index].count += 1;
                    }
                 }
-
-
     })
     .catch(error => {
     location = "Unknown Location";
@@ -355,7 +317,6 @@ function addPoint(e) {
             },
             "properties": {
                 "description": "",
-                "image": null,
                 "country": countryName,
                 "location": location
             },
@@ -365,132 +326,6 @@ function addPoint(e) {
         updateNumberOfPosts();
         map.getSource('points').setData(geojson);
         entry.showModal();
-
-    });
-    replaceSubmitButton();
-    const newSubmitButton = document.getElementById('submitButton');
-    newSubmitButton.innerText = 'Post';
-    clearPreviousEntry();
-    // Initialize description
-    document.querySelector('input[name="description"]').value = description;
-    map.getSource('points').setData(geojson);
-    console.log("Countries", countriesPost);
-
-    // Make the entry box appear and the exit button
-    exitButton.style.display = 'block';
-
-    // Remove old listeners and add a fresh one
-    newSubmitButton.addEventListener('click', function () {
-        // Update the latest input for the image and the description
-        description = document.querySelector('input[name="description"]').value;
-        const lastFeature = geojson.features[geojson.features.length - 1];
-        lastFeature.properties.description = description;
-        const file = imageInput.files[0];
-
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                lastFeature.properties.image = e.target.result;
-                map.getSource('points').setData(geojson);
-                localStorage.setItem('value', JSON.stringify(geojson));
-                localStorage.setItem('idCount', JSON.stringify(pointId));
-                receiveStamp(lastFeature.properties.location);
-                updateNumberOfCountries();
-
-            };
-            reader.readAsDataURL(file);
-        } else {
-            // Update GeoJSON even if no file is uploaded
-            alert("You must upload an image.");
-            return;
-        }
-
-        // Hide entry form and reset UI
-        entry.close();
-        clearPreviousEntry();
-        button.style.display = 'block';
-    });
-}
-*/
-
-
-function addPoint(e) {
-    let description = "";
-    let location = "";
-    let countryName = "";
-    let indexLocation = 0;
-    disablePointAdding();
-    const coordinates = e.lngLat;
-    const { lng, lat } = e.lngLat;
-    const reverseGeoCode = `https://api.mapbox.com/search/geocode/v6/reverse?longitude=${lng}&latitude=${lat}&language=en&access_token=${mapboxgl.accessToken}`;
-    fetch(reverseGeoCode)
-    .then(response => response.json())
-    .then(data => {
-        const lastIndex = data.features.length - 1;
-        const oddOrEven = (data.features.length) % 2;
-        if (oddOrEven === 0) {
-            indexLocation = (data.features.length / 2) - 1;
-
-        } else {
-            indexLocation = ((data.features.length + 1) / 2) - 1;
-            if (indexLocation === -1) {
-                indexLocation = 0;
-            }
-        }
-        console.log(data.features);
-        location = data.features[indexLocation].properties.full_address;
-        countryName = data.features[indexLocation].properties.context.country.name;
-        console.log("countryName", countryName);
-        const newFeature = {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [coordinates.lng, coordinates.lat]
-                },
-                "properties": {
-                    "description": "",
-                    "image": null,
-                    "country": countryName,
-                    "location": location
-                },
-                "id": pointId++
-            };
-            geojson.features.push(newFeature);
-            updateNumberOfPosts();
-            map.getSource('points').setData(geojson);
-            entry.showModal();
-            if (countryName !== "") {
-                   const index = countriesPost.findIndex(item => item.name === countryName);
-                   if (index === -1) {
-                      countriesPost.push({ name: countryName, count: 1 });
-                   } else {
-                      countriesPost[index].count += 1;
-                   }
-                }
-
-
-    })
-    .catch(error => {
-    location = "Unknown Location";
-    const newFeature = {
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [coordinates.lng, coordinates.lat]
-            },
-            "properties": {
-                "description": "",
-                "image": null,
-                "country": countryName,
-                "location": location
-            },
-            "id": pointId++
-        };
-        geojson.features.push(newFeature);
-        updateNumberOfPosts();
-        map.getSource('points').setData(geojson);
-        entry.showModal();
-
     });
     replaceSubmitButton();
     const newSubmitButton = document.getElementById('submitButton');
@@ -524,13 +359,11 @@ function addPoint(e) {
                 } else {
                     console.error("Database not ready yet.");
                 }
-                lastFeature.properties.image = null;
                 map.getSource('points').setData(geojson);
                 localStorage.setItem('value', JSON.stringify(geojson));
                 localStorage.setItem('idCount', JSON.stringify(pointId));
                 receiveStamp(lastFeature.properties.location);
                 updateNumberOfCountries();
-
             };
             reader.readAsDataURL(file);
         } else {
@@ -538,14 +371,12 @@ function addPoint(e) {
             alert("You must upload an image.");
             return;
         }
-
         // Hide entry form and reset UI
         entry.close();
         clearPreviousEntry();
         button.style.display = 'block';
     });
 }
-
 
 function editPoint(index) {
     const feature = geojson.features[index];
@@ -609,7 +440,6 @@ function editPoint(index) {
         console.error(`Failed to retrieve image for Feature ID: ${feature.id}`);
     };
 }
-
 
 // Event listener for the button
 button.addEventListener('click', function () {
@@ -768,7 +598,6 @@ discardButton.addEventListener('click', () => {
         updateNumberOfPosts();
 })
 
-
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
 
 
@@ -792,7 +621,6 @@ function spinGlobe() {
         center.lng -= distancePerSecond;
         map.easeTo({ center, duration: 1000, easing: (n) => n });
     }
-
 }
 
 map.on('mousedown',() => {
@@ -843,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken,
             types: 'address,poi',
-            proximity: [-73.99209, 40.68933] // Optional: Add your proximity coordinates
+            proximity: [-73.99209, 40.68933]
         });
         map.addControl(geocoder, 'top-right');
 
@@ -868,7 +696,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 menu.style.display = "flex";
                 customButton.style.display = "flex";
                 searchBar.style.display = "block";
-
             }
         });
 
@@ -881,12 +708,7 @@ const modeButton = document.getElementById('check');
 const spinStyle = document.querySelector(".modeButton1");
 const pfp = document.querySelector(".pfp")
 
-    if (savedState !== null) {
-      modeButton.checked = JSON.parse(savedState);
-    };
-
-    if (modeButton.checked) {
-        // Dark mode
+function darkMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         map.setStyle('mapbox://styles/mynavu/cm4b3wrge01bm01si09uyal4o');
         map.on('style.load', () => {
@@ -896,8 +718,9 @@ const pfp = document.querySelector(".pfp")
         spinStyle.style.setProperty('--before-background-color', 'white');
         spinStyle.style.setProperty('--before-box-shadow', '0 0 10px white');
         });
-    } else {
-        // Light mode
+}
+
+function lightMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         map.setStyle('mapbox://styles/mynavu/cm3std23v009l01sd8csudg7h'); // Light mode style
         map.on('style.load', () => {
@@ -907,39 +730,28 @@ const pfp = document.querySelector(".pfp")
         spinStyle.style.setProperty('--before-background-color', '#fffc00');
         spinStyle.style.setProperty('--before-box-shadow', '0 0 10px #fffc00');
         });
+}
+
+    if (savedState !== null) {
+      modeButton.checked = JSON.parse(savedState);
+    };
+    if (modeButton.checked) {
+        darkMode();
+    } else {
+        lightMode();
     }
 
 modeButton.addEventListener('change', () => {
     if (modeButton.checked) {
-        // Dark mode
-        localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-        map.setStyle('mapbox://styles/mynavu/cm4b3wrge01bm01si09uyal4o');
-        map.on('style.load', () => {
-        mode.innerText = "Mode: Dark";
-        pfp.src = "earth_pfp2.png";
-        spinStyle.style.backgroundColor = "#001f61";
-        spinStyle.style.setProperty('--before-background-color', 'white');
-        spinStyle.style.setProperty('--before-box-shadow', '0 0 10px white');
-        });
+        darkMode();
     } else {
-        // Light mode
-        localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-        map.setStyle('mapbox://styles/mynavu/cm3std23v009l01sd8csudg7h'); // Light mode style
-        map.on('style.load', () => {
-        mode.innerText = "Mode: Light";
-        pfp.src = "earth_pfp.png";
-        spinStyle.style.backgroundColor = "#6bd8ff";
-        spinStyle.style.setProperty('--before-background-color', '#fffc00');
-        spinStyle.style.setProperty('--before-box-shadow', '0 0 10px #fffc00');
-        });
+        lightMode();
     }
 });
 
 // SETTINGS
-
 const settingsButton = document.querySelector('.menuFriend');
 const customization = document.querySelector('.customization');
-
 
 settingsButton.addEventListener("click", () => {
     if (customization.style.display === "none" || customization.style.display === "") {
@@ -949,15 +761,12 @@ settingsButton.addEventListener("click", () => {
     }
 })
 
-
-
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-
+/* ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ---------------------------------------------------------------------------------------------------------------------------------- */
 
 } else if (window.location.pathname.includes("stamps.html")) {
       const settingsButton = document.querySelector('.menuFriend');
@@ -974,7 +783,6 @@ settingsButton.addEventListener("click", () => {
           }
       });
 
-
     //DARK MODE LIGHT MODE
     const mode = document.querySelector(".mode");
     const modeButton = document.getElementById('check');
@@ -982,73 +790,61 @@ settingsButton.addEventListener("click", () => {
     const backgroundColor = document.querySelector(".background");
     const savedState = localStorage.getItem("checkboxState");
 
-
-    if (savedState !== null) {
-      modeButton.checked = JSON.parse(savedState);
-    };
-
-    if (modeButton.checked) {
-        // Dark mode
+    function darkMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         mode.innerText = "Mode: Dark";
         pfp.src = "earth_pfp2.png";
         backgroundColor.style.background = "linear-gradient(black 20%, #07122e 50%)";
-    } else {
-        // Light mode
+    }
+
+    function lightMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         mode.innerText = "Mode: Light";
         pfp.src = "earth_pfp.png";
         backgroundColor.style.background = "linear-gradient(white 20%, var(--blue) 50%)";
     }
 
+    if (savedState !== null) {
+      modeButton.checked = JSON.parse(savedState);
+    };
+
+    if (modeButton.checked) {
+        darkMode();
+    } else {
+        lightMode();
+    }
+
     modeButton.addEventListener('change', () => {
         if (modeButton.checked) {
-            // Dark mode
-            localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-            mode.innerText = "Mode: Dark";
-            pfp.src = "earth_pfp2.png";
-            backgroundColor.style.background = "linear-gradient(black 20%, #07122e 50%)";
+            darkMode();
         } else {
-            // Light mode
-            localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-            mode.innerText = "Mode: Light";
-            pfp.src = "earth_pfp.png";
-            backgroundColor.style.background = "linear-gradient(white 20%, var(--blue) 50%)";
+            lightMode();
         }
     });
 
 const storedCountries = localStorage.getItem('countries_stored');
 const storedStamps = localStorage.getItem('stamps_stored');
 const storedGeojson = localStorage.getItem('value');
+
 const mostPostedCountry = document.querySelector('.mostPostedCountry');
 const mostPostedCountryImg = document.querySelector('.mostPostedCountryImg');
 const mostPostedCountryData = document.querySelector('.mostPostedCountryData');
+const mostPostedCountryStatement = document.querySelector('.mostPostedCountryStatement');
+
 const postsNumber = document.querySelector('.postsNumber');
 const stampsNumber = document.querySelector('.stampsNumber');
 const countriesNumber = document.querySelector('.countriesNumber');
+
 const suggestionImg = document.querySelector('.suggestionImg');
 const suggestionCountry = document.querySelector('.country');
 const suggestionCity = document.querySelectorAll('.city');
 const suggestionStatement = document.querySelector('.suggestionStatement');
-const mostPostedCountryStatement = document.querySelector('.mostPostedCountryStatement');
+
 const stampsReminder = document.querySelector('.stampsReminder');
 const countriesReminder = document.querySelector('.countriesReminder');
-const totalStamps = [{city: "Amsterdam", country: "Netherlands"}, {city: "Barcelona", country: "Spain"},
-{city: "Beijing", country: "China"}, {city: "Bordeaux",country: "Paris"}, {city: "Cairo", country: "Egypt"},
-{city: "Cape Town", country: "South Africa"}, {city: "Cappadocia",country: "Turkey"},
-{city: "Cartagena", country: "Colombia"}, {city: "Chefchaouen", country: "Morocco"},
-{city: "Christchurch", country: "New Zealand"}, {city: "Evora", country: "Portugal"},
-{city: "Hamburg", country: "Germany"}, {city: "Havana", country: "Cuba"},
-{city: "Hawaii", country: "United States"}, {city: "Hong Kong", country: "China"},
-{city: "Istanbul", country: "Turkey"}, {city: "Jerusalem", country: "Israel"},
-{city: "London", country: "England"}, {city: "Los Angeles", country: "United States"},
-{city: "Moscow", country: "Russia"}, {city: "Naples", country: "Italy"},
-{city: "New York", country: "United States"}, {city: "Nuuk", country: "Greenland"},
-{city: "Oaxaca", country: "Mexico"}, {city: "Paris", country: "France"}, {city: "Port Louis", country: "Mauritius"},
-{city: "Rome", country: "Italy"}, {city: "Santorini", country: "Greece"}, {city: "Seoul", country: "South Korea"},
-{city: "Singapore", country: "Singapore"}, {city: "Sydney", country: "Australia"}, {city: "Tokyo", country: "Japan"},
-{city: "Vancouver", country: "Canada"}, {city: "Washington", country: "United States"}];
+
 const credits = document.querySelector(".credits");
+
 let stampList = [];
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -1111,10 +907,8 @@ let stampList = [];
               credits.style.display = "none";
               }
           } else {
-              console.log("NO STAMPS STORED")
-
+              credits.style.display = "none";
           }
-
               const stampsLeft = totalStamps.filter((stamp) => (!stampList.includes(stamp.city)));
               const randomIndex = Math.floor(Math.random() * stampsLeft.length);
               const randomSuggestion = stampsLeft[randomIndex];
@@ -1137,56 +931,43 @@ let stampList = [];
             console.log(geojson.features.length);
             postsNumber.innerText = geojson.features.length;
           }
-
-
       });
-
-
 }
 
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------------------------------------------------------------- */
+/* ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ----------------------------------------------------------------------------------------------------------------------------------
+   ---------------------------------------------------------------------------------------------------------------------------------- */
 
 else if (window.location.pathname.includes("home.html")) {
 
 const storedCountries = localStorage.getItem('countries_stored');
 const storedStamps = localStorage.getItem('stamps_stored');
 const storedGeojson = localStorage.getItem('value');
+
 const mostPostedCountry = document.querySelector('.mostPostedCountry');
 const mostPostedCountryImg = document.querySelector('.mostPostedCountryImg');
 const mostPostedCountryData = document.querySelector('.mostPostedCountryData');
+
 const postsNumber = document.querySelector('.postsNumber');
 const stampsNumber = document.querySelector('.stampsNumber');
 const countriesNumber = document.querySelector('.countriesNumber');
+
 const suggestionImg = document.querySelector('.suggestionImg');
 const suggestionCountry = document.querySelector('.country');
 const suggestionCity = document.querySelectorAll('.city');
 const suggestionStatement = document.querySelector('.suggestionStatement');
 const mostPostedCountryStatement = document.querySelector('.mostPostedCountryStatement');
-const totalStamps = [{city: "Amsterdam", country: "Netherlands"}, {city: "Barcelona", country: "Spain"},
-{city: "Beijing", country: "China"}, {city: "Bordeaux",country: "Paris"}, {city: "Cairo", country: "Egypt"},
-{city: "Cape Town", country: "South Africa"}, {city: "Cappadocia",country: "Turkey"},
-{city: "Cartagena", country: "Colombia"}, {city: "Chefchaouen", country: "Morocco"},
-{city: "Christchurch", country: "New Zealand"}, {city: "Evora", country: "Portugal"},
-{city: "Hamburg", country: "Germany"}, {city: "Havana", country: "Cuba"},
-{city: "Hawaii", country: "United States"}, {city: "Hong Kong", country: "China"},
-{city: "Istanbul", country: "Turkey"}, {city: "Jerusalem", country: "Israel"},
-{city: "London", country: "England"}, {city: "Los Angeles", country: "United States"},
-{city: "Moscow", country: "Russia"}, {city: "Naples", country: "Italy"},
-{city: "New York", country: "United States"}, {city: "Nuuk", country: "Greenland"},
-{city: "Oaxaca", country: "Mexico"}, {city: "Paris", country: "France"}, {city: "Port Louis", country: "Mauritius"},
-{city: "Rome", country: "Italy"}, {city: "Santorini", country: "Greece"}, {city: "Seoul", country: "South Korea"},
-{city: "Singapore", country: "Singapore"}, {city: "Sydney", country: "Australia"}, {city: "Tokyo", country: "Japan"},
-{city: "Vancouver", country: "Canada"}, {city: "Washington", country: "United States"}];
+
 let stampList = [];
+
 const imgDisplay = document.querySelector(".imgDisplay");
 const descriptionDisplay = document.querySelector(".descriptionDisplay");
 const locationDisplay = document.querySelector(".locationDisplay");
 const mainbar2 = document.querySelector(".mainbar2");
+
 document.addEventListener('DOMContentLoaded', () => {
 if (storedCountries) {
               let countriesPost = JSON.parse(storedCountries);
@@ -1224,8 +1005,6 @@ if (storedCountries) {
               stampsNumber.innerText = stampList.length;
               console.log("Stamp list length",stampList.length);
               const postReminder = document.querySelector(".postReminder");
-
-
 
     const indexedDB = window.indexedDB ||
         window.mozIndexedDB ||
@@ -1302,8 +1081,6 @@ if (storedCountries) {
     };
 });
 
-
-
       const settingsButton = document.querySelector('.menuFriend');
       const customization = document.querySelector('.customization');
 
@@ -1315,8 +1092,6 @@ if (storedCountries) {
           }
       });
 
-
-
     //DARK MODE LIGHT MODE
     const mode = document.querySelector(".mode");
     const modeButton = document.getElementById('check');
@@ -1324,39 +1099,36 @@ if (storedCountries) {
     const backgroundColor = document.querySelector(".background2");
     const savedState = localStorage.getItem("checkboxState");
 
-    if (savedState !== null) {
-      modeButton.checked = JSON.parse(savedState);
-    };
-
-    if (modeButton.checked) {
-        // Dark mode
+    function darkMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         mode.innerText = "Mode: Dark";
         pfp.src = "earth_pfp2.png";
         backgroundColor.style.background = "linear-gradient(black 20%, #07122e 50%)";
-    } else {
-        // Light mode
+    };
+
+    function lightMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         mode.innerText = "Mode: Light";
         pfp.src = "earth_pfp.png";
         backgroundColor.style.background = "linear-gradient(white 20%, var(--blue) 50%)";
     }
 
+    if (savedState !== null) {
+      modeButton.checked = JSON.parse(savedState);
+    };
+
+    if (modeButton.checked) {
+        darkMode();
+    } else {
+        lightMode();
+    }
+
     modeButton.addEventListener('change', () => {
         if (modeButton.checked) {
-            // Dark mode
-            localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-            mode.innerText = "Mode: Dark";
-            pfp.src = "earth_pfp2.png";
-            backgroundColor.style.background = "linear-gradient(black 20%, #07122e 50%)";
+            darkMode();
         } else {
-            // Light mode
-            localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
-            mode.innerText = "Mode: Light";
-            pfp.src = "earth_pfp.png";
-            backgroundColor.style.background = "linear-gradient(white 20%, var(--blue) 50%)";
+            lightMode();
         }
     });
 }
 
-// https://www.lonelyplanet.com/north-korea
