@@ -238,7 +238,7 @@ function stampNotify(stamp) {
     const formattedStamp = stamp.replaceAll("_", " ");
     const HTMLString = `
     <div class="stampNotif">
-        <img src="/stamps/${stamp}.PNG">
+        <img src="stamps/${stamp}.PNG">
         <div class="achievement">
             <h3>New Stamp Unlocked!</h3>
             <h1>${formattedStamp}</h1>
