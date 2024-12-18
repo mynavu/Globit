@@ -1,7 +1,13 @@
 import { totalStamps } from './totalStamps.js';
 import { matchList } from './matchList.js';
 
+console.log("Current path:", window.location.pathname); // Log current path to check the pathname
+
+
 if (window.location.pathname.includes("index.html")) {
+
+  console.log("index.html found in the path");
+
 
 const indexedDB = window.indexedDB ||
 window.mozIndexedDF ||

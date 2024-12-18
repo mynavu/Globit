@@ -34,5 +34,3 @@ export const totalStamps = [
     { city: "Vancouver", country: "Canada" },
     { city: "Washington", country: "United States" },
   ];
-
-  console.log("totalStamps.js loaded:", window.totalStamps);
