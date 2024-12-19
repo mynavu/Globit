@@ -4,7 +4,6 @@ import { matchList } from './matchList.js';
 console.log("Current path:", window.location.pathname); // Log current path to check the pathname
 /*
 if (!window.location.pathname.endsWith('.html')) {
-  // Check for specific page paths and redirect to respective .html pages
   if (window.location.pathname === '/') {
     window.location.pathname = '/index.html';
   } else if (window.location.pathname === '/home') {
@@ -18,8 +17,7 @@ if (!window.location.pathname.endsWith('.html')) {
 }
 */
 
-if (window.location.pathname.includes("index.html")) {
-
+if (window.location.pathname === '/' || window.location.pathname.includes('/index')) {
   console.log("index.html found in the path");
 
 
@@ -788,7 +786,7 @@ settingsButton.addEventListener("click", () => {
    ----------------------------------------------------------------------------------------------------------------------------------
    ---------------------------------------------------------------------------------------------------------------------------------- */
 
-} else if (window.location.pathname.includes("stamps.html")) {
+} else if (window.location.pathname.includes("/stamps")) {
       const settingsButton = document.querySelector('.menuFriend');
       const customization = document.querySelector('.customization');
       const allStamps = document.querySelector('.allStamps');
@@ -961,7 +959,7 @@ let stampList = [];
    ----------------------------------------------------------------------------------------------------------------------------------
    ---------------------------------------------------------------------------------------------------------------------------------- */
 
-else if (window.location.pathname.includes("home.html")) {
+else if (window.location.pathname.includes("/home")) {
 
 const storedCountries = localStorage.getItem('countries_stored');
 const storedStamps = localStorage.getItem('stamps_stored');
