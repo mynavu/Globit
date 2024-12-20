@@ -1348,7 +1348,6 @@ body.home {
 
 @media (max-width: 500px) {
 
-}
   .stampNotif {
     height: 100px;
     width: 200px;
@@ -1359,7 +1358,7 @@ body.home {
  achievement h3,
  achievement p {
   margin-top: 8px;
-
+ }
 
 
  .achievement h1 {
