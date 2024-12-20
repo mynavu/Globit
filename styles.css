@@ -345,7 +345,7 @@ input:checked + .modeButton::before {
     --before-background-color,
     #fffc00
   );
-  box-shadow: 0px 0px 10px 1px #fffc00;
+  box-shadow: var(--before-box-shadow, 0px 0px 10px 1px #fffc00);
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -460,27 +460,6 @@ a {
 }
 
 @keyframes appearAndDisappear {
-  0% {
-    opacity: 0;
-  }
-
-  30% {
-    opacity: 1;
-    transform: translateX(-150px);
-  }
-
-  70% {
-    opacity: 1;
-    transform: translateX(-150px);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(150px);
-  }
-}
-
-@keyframes appearAndDisappear2 {
   0% {
     opacity: 0;
   }
@@ -1218,7 +1197,6 @@ body.home {
   .stampNotif {
     height: 100px;
     width: 200px;
-  animation: appearAndDisappear2 8s linear;
   }
 
 .achievement h1,
@@ -1351,7 +1329,6 @@ body.home {
   .stampNotif {
     height: 100px;
     width: 200px;
-  animation: appearAndDisappear2 8s linear;
   }
 
  achievement h1,
