@@ -641,7 +641,7 @@ a {
 .p1 {
   font-weight: 600;
   margin-top: 15px;
-  margin-left: 50px;
+  margin-left: 45px;
   position: absolute;
   font-size: 13px;
 }
@@ -1052,46 +1052,27 @@ body.home {
   text-align: center;
 }
 
-@media (max-width: 900px) {
+
+
+@media (max-width: 1500px) and (min-width: 1200px) {
   .recap {
-    width: 200px;
+    width: 290px;
   }
-
+  .post {
+    width: 600px !important;
+  }
   .suggestion {
-    width: 200px;
-  }
-
-  .rightbar {
-    align-items: center;
+    width: 290px;
   }
 
   .stampsCollection {
-    width: 280px;
+    width: 100%;
   }
   .countriesCollection {
-    width: 280px;
-  }
-}
-
-@media (max-width: 1300px) and (min-width: 1000px) {
-  .recap {
-    width: 230px;
+    width: 100%;
   }
 
-  .suggestion {
-    width: 230px;
-  }
 
-  .rightbar {
-    align-items: center;
-  }
-
-  .stampsCollection {
-    width: 700px;
-  }
-  .countriesCollection {
-    width: 700px;
-  }
 }
 
 @media (max-width: 1200px) and (min-width: 900px) {
@@ -1099,12 +1080,17 @@ body.home {
     width: 230px;
   }
 
+  .post {
+    width: 500px !important;
+    margin-left: 5px;
+  }
+
+
   .suggestion {
     width: 230px;
   }
 
   .rightbar {
-    align-items: center;
   }
 
   .stampsCollection {
@@ -1113,6 +1099,115 @@ body.home {
   .countriesCollection {
     width: 500px;
   }
+
+  .mainbar, .mainbar2  {
+    background: red;
+    margin-left: 30px;
+  }
+
+}
+
+@media (max-width: 900px) and (min-width: 700px) {
+  .recap {
+    width: 180px;
+  }
+
+  .post {
+    width: 400px !important;
+    margin-left: 50px;
+  }
+
+  .suggestion {
+    width: 180px;
+  }
+
+  .rightbar, .rightbar2  {
+    /*
+    background: red;
+    */
+  }
+
+  .stampsCollection {
+    width: 400px;
+  }
+  .countriesCollection {
+    width: 400px;
+  }
+
+  .mainbar {
+    background: blue;
+    margin-left: 50px;
+  }
+
+}
+
+
+@media (max-width: 800px) and (min-width: 600px) {
+  .recap {
+    width: 180px;
+  }
+
+  .suggestion {
+    width: 180px;
+  }
+
+  .post {
+    width: 280px !important;
+    margin-left: 50px;
+  }
+
+  .rightbar, .rightbar2 {
+  /*
+    background: yellow;
+    */
+  }
+
+  .stampsCollection {
+    width: 300px;
+  }
+  .countriesCollection {
+    width: 300px;
+  }
+
+  .mainbar {
+  /*
+    background: red;
+    */
+    margin-left: 50px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+  .recap {
+    width: 180px;
+  }
+
+  .suggestion {
+    width: 180px;
+  }
+
+  .rightbar {
+  }
+
+  .post {
+    width: 200px !important;
+    margin-left: 52px;
+  }
+
+
+  .stampsCollection {
+    width: 200px;
+  }
+  .countriesCollection {
+    width: 200px;
+  }
+
+  .mainbar {
+  margin-left: 52px;
+  }
+
 }
 
 .mainbar2 {
@@ -1154,35 +1249,56 @@ body.home {
 }
 
 .profileDisplay {
-  position: relative;
-  height: 100px;
+  height: 100%;
   left: 20px;
   top: 15px;
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 0px;
 }
 
 .pfp2 {
   position: relative;
-  left: 0px;
+  left: 10px;
+  top: 5px;
   width: 80px;
+  height: 80px;
 }
 
 .username2 {
   position: relative;
-  top: -90px;
-  left: 80px;
+  left: 10px;
+  margin-bottom: 0;
 }
+
 .locationDisplay {
-  position: relative;
-  top: -110px;
-  left: 80px;
+    position: relative;
+    left: 10px;
+    width: calc(100%);
+    word-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+    margin-top: 0;
 }
+
+
+.usernameAndLocation {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    height: 100%;
+    padding-right: 15px;
+}
+
 .imgDisplay {
   width: 100%;
 }
+
 .descriptionDisplay {
   width: 100%;
   padding-left: 30px;
   padding-right: 30px;
+  margin-bottom: 5px;
 }
 
 .rightbar2 {

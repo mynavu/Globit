@@ -1,25 +1,8 @@
 import { totalStamps } from './totalStamps.js';
 import { matchList } from './matchList.js';
 
-console.log("Current path:", window.location.pathname); // Log current path to check the pathname
-/*
-if (!window.location.pathname.endsWith('.html')) {
-  if (window.location.pathname === '/') {
-    window.location.pathname = '/index.html';
-  } else if (window.location.pathname === '/home') {
-    window.location.pathname = '/home.html';
-  } else if (window.location.pathname === '/stamps') {
-    window.location.pathname = '/stamps.html';
-  } else {
-    // You can add more cases for other pages here
-    window.location.pathname = '/index.html';
-  }
-}
-*/
-
 if (window.location.pathname === '/' || window.location.pathname.includes('/index')) {
   console.log("index.html found in the path");
-
 
 const indexedDB = window.indexedDB ||
 window.mozIndexedDF ||
@@ -47,9 +30,6 @@ request.onerror = function (event) {
 };
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw';
-
-//TEST REVERSE GEOCODING
-//https://api.mapbox.com/search/geocode/v6/reverse?longitude=50&latitude=50&language=en&access_token=pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw
 
 const submitButton = document.getElementById('submitButton');
 
@@ -205,7 +185,6 @@ function deletePoint(index) {
     const featureToDelete = geojson.features[index];
     const deletedCountry = featureToDelete.properties.country;
     geojson.features.splice(index, 1);
-    // Update countriesPost
     const deletedIndex = countriesPost.findIndex(country => country.name === deletedCountry);
     if (deletedIndex !== -1) {
         countriesPost[deletedIndex].count -= 1;
@@ -213,7 +192,6 @@ function deletePoint(index) {
             countriesPost.splice(deletedIndex, 1);
         }
     }
-
     // Update the map data and UI
     map.getSource('points').setData(geojson);
     localStorage.setItem('value', JSON.stringify(geojson));
@@ -426,12 +404,10 @@ function editPoint(index) {
         newSubmitButton.addEventListener('click', function () {
             const newDescription = document.querySelector('input[name="description"]').value;
             button.style.display = 'block';
-
             // Update description
             if (newDescription) {
                 feature.properties.description = newDescription;
             }
-
             // Check if a new file was uploaded
             const file = imageInput.files[0];
             if (file) {
@@ -469,7 +445,7 @@ imageInput.addEventListener('change', function (event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.readAsDataURL(file); // Convert file to base64 string
+        reader.readAsDataURL(file);
         reader.onload = function (e) {
             imagePreview.src = e.target.result;
             imagePreview.style.display = 'block';
@@ -478,49 +454,10 @@ imageInput.addEventListener('change', function (event) {
     }
 });
 
-
-// IF YOU PRESS A POPUP OF A POST
-/*
-e.features[0] is the feature (point) that was clicked on in the map.
-e is the event object containing information about the click.
-e.features is an array of features (usually 1 feature for a single click).
-e.features[0] gives you access to the first feature (the clicked point).
-
-e looks like {
-                 "lngLat": {
-                     "lng": 103.8198,  // Longitude of the click position
-                     "lat": 1.3521     // Latitude of the click position
-                 },
-                 "point": {
-                     "x": 150,   // X coordinate of the click relative to the canvas (screen position)
-                     "y": 200    // Y coordinate of the click relative to the canvas (screen position)
-                 },
-                 "features": [
-                     {
-                         "type": "Feature",      // GeoJSON type
-                         "geometry": {
-                             "type": "Point",     // Type of geometry (Point in this case)
-                             "coordinates": [103.8198, 1.3521]  // Coordinates of the clicked point (Longitude, Latitude)
-                         },
-                         "properties": {
-                             "description": "Sample Description",  // Custom property you added to the feature
-                             "image": "data:image/png;base64,...", // Base64-encoded image data if uploaded
-                             "country": "Singapore"                // The country of the point (e.g., "Singapore")
-                         },
-                         "id": 0  // Unique identifier for the feature (based on your GeoJSON)
-                     }
-                 ],
-                 "type": "click",  // Type of event (click in this case)
-                 "target": map,    // The map object itself
-                 "originalEvent": { ... } // Raw browser event data
-             }
-*/
-
 map.on('click', 'points-layer', function(e) {
     if (text.style.display !== 'block') {
         const coordinates = e.lngLat;
         const feature = e.features[0];
-        console.log('Feature ID:', feature.id);
         console.log('Feature:', feature);
 
         const featureIndex = geojson.features.findIndex(f => f.id === feature.id);
@@ -565,7 +502,6 @@ map.on('click', 'points-layer', function(e) {
                                 // Ensure the DOM has rendered before adding listeners
                                 document.getElementById(`edit-btn-${featureIndex}`).addEventListener('click', () => {
                                     replaceSubmitButton();
-                                    console.log(featureIndex);
                                     const newSubmitButton = document.getElementById('submitButton');
                                     newSubmitButton.innerText = 'Edit';
 
@@ -603,7 +539,6 @@ cancelButton.addEventListener('click', () => {
     confirmCloseButton.close();
 })
 
-
 discardButton.addEventListener('click', () => {
     confirmCloseButton.close();
     imagePreview.src = '';
@@ -617,8 +552,6 @@ discardButton.addEventListener('click', () => {
 })
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
-
-
 // SPINNING
 const secondsPerRevolution = 120;
 const maxSpinZoom = 5;
@@ -791,7 +724,6 @@ settingsButton.addEventListener("click", () => {
       const customization = document.querySelector('.customization');
       const allStamps = document.querySelector('.allStamps');
       const allCountries = document.querySelector('.allCountries');
-
 
       settingsButton.addEventListener("click", () => {
           if (customization.style.display === "none" || customization.style.display === "") {
@@ -1004,13 +936,11 @@ if (storedCountries) {
                   };
                   mostPostedCountryData.innerHTML = `You posted in ${maxCountry.name} ${maxCountry.count} times!`
               }  else {
-              console.log("None");
               mostPostedCountryStatement.innerHTML = "";
               mostPostedCountryData.innerHTML = "Start posting to get a recap of your journey!"};
           }
 
           if (storedStamps) {
-              console.log("YES STAMP STORED")
               stampList = JSON.parse(storedStamps);
           }
               const stampsLeft = totalStamps.filter((stamp) => (!stampList.includes(stamp.city)));
@@ -1045,7 +975,6 @@ if (storedCountries) {
     // Open IndexedDB and initialize db
     request.onsuccess = async function (event) {
         db = event.target.result; // Initialize db after success
-
         // Now proceed with processing storedGeojson
         if (storedGeojson) {
             let geojson = JSON.parse(storedGeojson);
@@ -1055,7 +984,6 @@ if (storedCountries) {
 
             if (geojson.features.length > 0) {
                 postReminder.style.display = "none";
-
                 // Process posts in order
                 for (const feature of geojson.features) {
                     await new Promise((resolve) => {
@@ -1064,14 +992,16 @@ if (storedCountries) {
                         const getRequest = store.get(feature.id);
 
                         getRequest.onsuccess = function () {
-                            const imageBlob = getRequest.result?.data; // Access result only after onsuccess
+                            const imageBlob = getRequest.result?.data;
                             if (imageBlob) {
                                 const HTMLString = `
                                 <div class="post">
                                     <div class="profileDisplay">
                                         <img class="pfp2" src="earth_pfp.png">
-                                        <h4 class="username2">Guest</h4>
-                                        <h5 class="locationDisplay average">${feature.properties.location}</h5>
+                                        <div class="usernameAndLocation">
+                                            <h4 class="username2">Guest</h4>
+                                            <h5 class="locationDisplay average">${feature.properties.location}</h5>
+                                        </div>
                                     </div>
                                     <img class="imgDisplay" src="${imageBlob}">
                                     <h5 class="descriptionDisplay average">${feature.properties.description}</h5>
@@ -1079,12 +1009,11 @@ if (storedCountries) {
                                 `;
                                 mainbar2.insertAdjacentHTML("beforeend", HTMLString);
                             }
-                            resolve(); // Resolve the promise to continue the loop
+                            resolve();
                         };
-
                         getRequest.onerror = function () {
                             console.error(`Error retrieving data for feature ID ${feature.id}`);
-                            resolve(); // Resolve even if there's an error
+                            resolve();
                         };
                     });
                 }
@@ -1098,7 +1027,6 @@ if (storedCountries) {
         console.error("Error opening IndexedDB:", event.target.errorCode);
     };
 });
-
       const settingsButton = document.querySelector('.menuFriend');
       const customization = document.querySelector('.customization');
 
