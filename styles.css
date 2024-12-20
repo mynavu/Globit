@@ -769,7 +769,7 @@ a {
   border-radius: 20px;
   background: -webkit-linear-gradient(top, #ffad7a 0%, var(--orange) 100%);
   position: fixed;
-  display: flex;
+  display: none;
   flex-direction: column;
   box-shadow: 5px 5px 0 0px black;
   border: 2px solid black;

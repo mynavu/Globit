@@ -131,9 +131,11 @@ const text = document.querySelector('.text');
 const button = document.getElementById('customButton');
 const imageInput = document.getElementById('imageInput');
 const imagePreview = document.getElementById('imagePreview');
+const menu = document.querySelector('.menu');
 
 window.onload = () => {
     button.style.display = "block";
+    menu.style.display = "flex";
 }
 
 // When you are NOT adding a new point or CLICKING a point but want to HOVER
@@ -634,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
         map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
         const zoomButton = document.querySelector('.mapboxgl-ctrl-fullscreen');
-        const menu = document.querySelector('.menu');
+
         const searchBar = document.querySelector('.mapboxgl-ctrl-geocoder');
 
         zoomButton.addEventListener("click", () => {
