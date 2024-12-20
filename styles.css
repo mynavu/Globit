@@ -480,6 +480,29 @@ a {
   }
 }
 
+@keyframes appearAndDisappear2 {
+  0% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateX(-100px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateX(-100px);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+}
+
+
+
 .stampNotif img {
   height: 100px;
 }
@@ -490,11 +513,6 @@ a {
   align-items: center;
 }
 
-.achievement h1,
-.achievement h3,
-.achievement p {
-  margin: 8px;
-}
 
 .mapboxgl-popup-content {
   background-color: white !important;
@@ -744,6 +762,13 @@ a {
   cursor: pointer;
   padding-left: 15px;
 }
+
+.achievement h1,
+.achievement h3,
+.achievement p {
+  margin: 8px;
+}
+
 
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined" !important;
@@ -1190,6 +1215,48 @@ body.home {
     z-index: 3;
   }
 
+  .stampNotif {
+    height: 100px;
+    width: 200px;
+  animation: appearAndDisappear2 8s linear;
+  }
+
+.achievement h1,
+.achievement h3,
+.achievement p {
+  margin-top: 8px;
+}
+
+
+ .achievement h1 {
+     font-size: 15px;
+     margin-top: 0;
+     margin-bottom: 0;
+ }
+
+ .achievement h3 {
+     font-size: 10px;
+     text-align: center;
+     margin-bottom: 2px;
+  }
+.achievement p {
+  font-size: 10px;
+  margin-top: 2px;
+  }
+
+  .stampNotif img {
+    height: 80px;
+    margin-left: 5px;
+
+  }
+
+  .text {
+    font-size: 15px;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
  #customButton {
     left: 30px;
     bottom: 70px;
@@ -1280,6 +1347,50 @@ body.home {
 
 
 @media (max-width: 500px) {
+
+}
+  .stampNotif {
+    height: 100px;
+    width: 200px;
+  animation: appearAndDisappear2 8s linear;
+  }
+
+ achievement h1,
+ achievement h3,
+ achievement p {
+  margin-top: 8px;
+
+
+
+ .achievement h1 {
+     font-size: 15px;
+     margin-top: 0;
+     margin-bottom: 0;
+ }
+
+ .achievement h3 {
+     font-size: 10px;
+     text-align: center;
+     margin-bottom: 2px;
+  }
+ achievement p {
+  font-size: 10px;
+  margin-top: 2px;
+  }
+
+  .stampNotif img {
+    height: 80px;
+    margin-left: 5px;
+
+  }
+
+
+  .text {
+    font-size: 20px;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
 
   .recap h1, .suggestion h1 {
   font-size: 15px !important;
