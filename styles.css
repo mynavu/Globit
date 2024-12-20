@@ -1200,7 +1200,7 @@ body.home {
   left: unset;
   bottom: 55px;
   top: unset;
-  right: 80px;
+  right: 60px;
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100px;
@@ -1299,6 +1299,9 @@ body.home {
     margin-right: 40px;
   }
 
+.menu svg {
+  transform: translate(-100%, 3%);
+}
 .suggestionImg {
     width: 80px !important;
   }
@@ -1328,10 +1331,11 @@ bottom: 70px;
   left: unset;
   bottom: 55px;
   top: unset;
-  right: 80px;
+  right: 60px;
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100px;
+  box-shadow: 3px 3px 0 0px black;
 }
 
 .mode, .spin {
