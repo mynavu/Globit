@@ -487,17 +487,17 @@ a {
 
   30% {
     opacity: 1;
-    transform: translateX(-100px);
+    transform: translateX(-130px);
   }
 
   70% {
     opacity: 1;
-    transform: translateX(-100px);
+    transform: translateX(-130px);
   }
 
   100% {
     opacity: 0;
-    transform: translateX(100px);
+    transform: translateX(130px);
   }
 }
 
