@@ -1186,7 +1186,6 @@ body.home {
     border: 0px solid black;
     border-top: 2px solid black;
     display: flex;
-
   }
 
 .customization {
@@ -1203,7 +1202,7 @@ body.home {
 }
 
     #map {
-    height: calc(100vh - 100px);
+    height: calc(100vh - 135px);
     }
 
   .Icon {
