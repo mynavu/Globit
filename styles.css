@@ -582,7 +582,7 @@ a {
   width: 50px;
   z-index: 1;
   cursor: pointer;
-  display: block;
+  display: none;
 }
 
 #customButton i:hover {
@@ -1071,7 +1071,6 @@ body.home {
   }
 
   .mainbar, .mainbar2  {
-    background: red;
     margin-left: 30px;
   }
 
@@ -1509,7 +1508,6 @@ bottom: 70px;
 }
 
 .leftbar2 {
-  background: red;
   height: auto;
   grid-column: 1;
 }

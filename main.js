@@ -132,6 +132,10 @@ const button = document.getElementById('customButton');
 const imageInput = document.getElementById('imageInput');
 const imagePreview = document.getElementById('imagePreview');
 
+window.onload = () => {
+    button.style.display = "block";
+}
+
 // When you are NOT adding a new point or CLICKING a point but want to HOVER
 map.on('mouseenter', 'points-layer', (e) => {
     if (!clickPopup && text.style.display !== 'block') {
