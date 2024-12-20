@@ -1240,7 +1240,7 @@ body.home {
   }
 
   .post, .postReminder {
-    width: 350px !important;
+    width: 300px !important;
   }
 
   .stampsCollection, .countriesCollection {
@@ -1368,7 +1368,7 @@ bottom: 70px;
   }
 
   .post, .postReminder {
-    width: 350px !important;
+    width: 300px !important;
     margin-right: 80px;
   }
 
