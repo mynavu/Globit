@@ -1186,6 +1186,7 @@ body.home {
     border: 0px solid black;
     border-top: 2px solid black;
     display: flex;
+    z-index: 3;
   }
 
 .customization {
@@ -1193,11 +1194,14 @@ body.home {
   bottom: 0px;
   top: unset;
   right: 0px;
-  padding: 12px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   width: 100px;
+  z-index: 4;
+  position: absolute;
 }
 
-.mode {
+.mode, .spin {
     display: none;
 }
 
@@ -1318,12 +1322,12 @@ body.home {
   width: 100px;
 }
 
-.mode {
+.mode, .spin {
     display: none;
 }
 
     #map {
-    height: calc(100vh - 230px);
+    height: calc(100vh - 220px);
     }
 
   .Icon {
