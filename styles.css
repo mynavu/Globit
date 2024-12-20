@@ -789,6 +789,8 @@ a {
   background: -webkit-linear-gradient(top, white 0%, var(--light-orange) 20%);
   border-bottom: solid 5px black;
   border-right: solid 5px black;
+  border-top: solid 2px black;
+  border-left: solid 2px black;
 }
 
 .mapboxgl-ctrl-geocoder {
@@ -1191,14 +1193,15 @@ body.home {
 
 .customization {
   left: unset;
-  bottom: 0px;
+  bottom: 55px;
   top: unset;
-  right: 0px;
+  right: 100px;
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100px;
   z-index: 4;
   position: absolute;
+  box-shadow: 3px 3px 0 0px black;
 }
 
 .mode, .spin {
@@ -1313,12 +1316,14 @@ body.home {
     display: flex;
   }
 
+
 .customization {
   left: unset;
-  bottom: 0px;
+  bottom: 55px;
   top: unset;
-  right: 0px;
-  padding: 12px;
+  right: 100px;
+  padding-top: 12px;
+  padding-bottom: 12px;
   width: 100px;
 }
 
@@ -1327,7 +1332,7 @@ body.home {
 }
 
     #map {
-    height: calc(100vh - 220px);
+    height: calc(100vh - 210px);
     }
 
   .Icon {
