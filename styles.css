@@ -636,6 +636,7 @@ a {
 .menuGlobe {
   z-index: 1;
   margin-left: 10px;
+  width: 105%;
 }
 
 .p1 {
@@ -644,26 +645,6 @@ a {
   margin-left: 45px;
   position: absolute;
   font-size: 13px;
-}
-
-.menuChat i {
-  background: linear-gradient(1800deg, var(--blue) 0%, #ffffff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 30px;
-  position: relative;
-  z-index: 1;
-}
-
-.menuChat {
-  z-index: 1;
-  display: inline-block;
-  top: 120px;
-  margin-left: 10px;
-}
-
-.menuChat p {
-  margin-left: 50px;
 }
 
 .menuHome i {
@@ -680,29 +661,10 @@ a {
   display: inline-block;
   top: 60px;
   margin-left: 10px;
+  width: 105%;
 }
 
 .menuHome p {
-  margin-left: 50px;
-}
-
-.menuHeart i {
-  background: linear-gradient(1800deg, var(--pink) 0%, #ffffff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 30px;
-  position: relative;
-  z-index: 1;
-}
-
-.menuHeart {
-  z-index: 1;
-  display: inline-block;
-  top: 240px;
-  margin-left: 10px;
-}
-
-.menuHeart p {
   margin-left: 50px;
 }
 
@@ -720,6 +682,8 @@ a {
   display: inline-block;
   top: 300px;
   margin-left: 10px;
+  width: 105%;
+
 }
 
 .menuStar p {
@@ -739,6 +703,7 @@ a {
   z-index: 1;
   display: inline-block;
   margin-left: 10px;
+  width: 105%;
 }
 
 .menuFriend:hover {
@@ -810,7 +775,7 @@ a {
 
 .Icon {
   height: 52px;
-  width: 120px;
+  width: 100%;
   border-radius: 18px;
   margin-left: -10px;
   padding-left: 10px;
@@ -1180,32 +1145,56 @@ body.home {
 
 
 @media (max-width: 600px) {
-  .recap {
-    width: 180px;
+
+  .recap h1, .suggestion h1 {
+  font-size: 15px !important;
   }
 
-  .suggestion {
-    width: 180px;
+  .recap h4, .suggestion h4 {
+    font-size: 10px !important;
+    }
+
+  .mostPostedCountryImg {
+    width: 70px !important;
   }
 
-  .rightbar {
+  .suggestion, .recap {
+    width: 150px;
+    margin-right: 40px;
+  }
+
+.suggestionImg {
+    width: 80px !important;
+  }
+
+  .p1 {
+    display: none;
+  }
+
+  .menu {
+    width: 55px;
+  }
+
+  .rightbar, .rightbar2 {
+    /*
+    background: red;
+    */
   }
 
   .post {
-    width: 200px !important;
-    margin-left: 52px;
+    width: 250px !important;
+    margin-right: 20px;
   }
 
-
-  .stampsCollection {
-    width: 200px;
+  .stampsCollection, .countriesCollection {
+    width: 250px;
+    margin-right: 18px;
   }
-  .countriesCollection {
-    width: 200px;
-  }
-
-  .mainbar {
-  margin-left: 52px;
+  .mainbar, .mainbar2 {
+  margin-left: 0px;
+  /*
+  background: blue;
+  */
   }
 
 }

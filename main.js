@@ -461,6 +461,7 @@ map.on('click', 'points-layer', function(e) {
         console.log('Feature:', feature);
 
         const featureIndex = geojson.features.findIndex(f => f.id === feature.id);
+        console.log("featureIndex: ", featureIndex, "feature.id: ", feature.id, "feature", feature)
         const transaction = db.transaction("images", "readonly");
         const store = transaction.objectStore("images");
         const getRequest = store.get(feature.id);
@@ -472,12 +473,10 @@ map.on('click', 'points-layer', function(e) {
                     image = `<img src="${imageBlob}" style="width: 200px; display: block; " />`
                     const location = feature.properties.location;
                             const description = feature.properties.description || "No description";
-
                             // Remove previous click popup
                             if (clickPopup) {
                                 clickPopup.remove();
                             }
-
                             // Create new click popup
                             clickPopup = new mapboxgl.Popup()
                                 .setLngLat(coordinates)
