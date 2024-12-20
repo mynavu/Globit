@@ -1241,6 +1241,7 @@ body.home {
 
   .post, .postReminder {
     width: 250px !important;
+    margin-right: 80px;
   }
 
   .stampsCollection, .countriesCollection {
@@ -1369,12 +1370,12 @@ bottom: 70px;
 
   .post, .postReminder {
     width: 250px !important;
-    margin-right: 80px;
+    margin-right: 90px;
   }
 
   .stampsCollection, .countriesCollection {
-    width: 200px;
-    margin-right: 15px;
+    width: 250px;
+    margin-right: 90px;
   }
   .pfp2 {
     width: 60px !important;
