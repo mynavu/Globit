@@ -1186,16 +1186,21 @@ body.home {
     border-radius: 0px;
     box-shadow: 0px 0px 0 0px black;
     border: 0px solid black;
-    border-top: 2px solid black;
+    border-top: 3px solid black;
     display: flex;
     z-index: 3;
   }
+
+ #customButton {
+    left: 30px;
+    bottom: 70px;
+ }
 
 .customization {
   left: unset;
   bottom: 55px;
   top: unset;
-  right: 100px;
+  right: 80px;
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100px;
@@ -1312,16 +1317,18 @@ body.home {
     border-radius: 0px;
     box-shadow: 0px 0px 0 0px black;
     border: 0px solid black;
-    border-top: 2px solid black;
+    border-top: 3px solid black;
     display: flex;
   }
-
-
+ #customButton {
+left: 30px;
+bottom: 70px;
+}
 .customization {
   left: unset;
   bottom: 55px;
   top: unset;
-  right: 100px;
+  right: 80px;
   padding-top: 12px;
   padding-bottom: 12px;
   width: 100px;
