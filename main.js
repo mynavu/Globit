@@ -48,6 +48,14 @@ let geojson = {
                 ]
               };
 
+
+let currentLocation = {
+                "type": "FeatureCollection",
+                "features": [
+                ]
+              };
+
+
 // Retrieve stored data from localStorage (if exists)
 let pointId = 0;
 let countriesPost = [];
@@ -109,12 +117,77 @@ function addPointsLayer(map, geojson) {
     }
 }
 
+function addCurrentLocation(map, currentLocation) {
+    // Check if the source already exists to avoid errors
+    if (!map.getSource('currentPoint')) {
+        map.addSource('currentPoint', {
+            type: 'geojson',
+            data: currentLocation
+        });
+    }
+    // Check if the layer already exists to avoid duplication
+    if (!map.getLayer('current-points-layer')) {
+        map.loadImage('./pointerface2.png', (error, image) => {
+            if (error) throw error;
+            if (!map.hasImage('custom-pointer2')) {
+                map.addImage('custom-pointer2', image);
+            }
+            map.addLayer({
+                id: 'current-points-layer',
+                type: 'symbol',
+                source: 'currentPoint',
+                layout: {
+                    'icon-image': 'custom-pointer2',
+                    'icon-size': 0.15,
+                    'icon-allow-overlap': true,
+                    'icon-offset': [40, -200]
+                }
+            });
+        });
+    }
+}
+
 // Add points when the map initially loads and re-add points whenever the style is reloaded
+
+const menu = document.querySelector('.menu');
+const button = document.getElementById('customButton');
+
 map.on('load', () => {
     addPointsLayer(map, geojson);
 });
 map.on('style.load', () => {
     addPointsLayer(map, geojson);
+    button.style.display = "block";
+    menu.style.display = "flex";
+});
+
+navigator.geolocation.getCurrentPosition(position => {
+    const { latitude, longitude } = position.coords;
+    console.log("CURRENT LOCATION", latitude, longitude);
+    const point = {
+                                  "type": "Feature",
+                                  "geometry": {
+                                      "type": "Point",
+                                      "coordinates": [longitude, latitude]
+                                  }
+                              };
+    if (currentLocation.features.length === 0) {
+   currentLocation.features.push(point);
+   };
+   console.log(currentLocation.features);
+   if (currentLocation.features.length > 0) {
+       if (map.isStyleLoaded()) {
+              addCurrentLocation(map, currentLocation);
+              } else {
+
+       map.on('style.load', () => {
+       addCurrentLocation(map, currentLocation);
+       });
+       map.on('load', () => {
+              addCurrentLocation(map, currentLocation);
+       });
+   }
+   }
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
@@ -128,15 +201,9 @@ let hoverPopup = null;
 let clickPopup = null;
 const entry = document.getElementById('entry');
 const text = document.querySelector('.text');
-const button = document.getElementById('customButton');
 const imageInput = document.getElementById('imageInput');
 const imagePreview = document.getElementById('imagePreview');
-const menu = document.querySelector('.menu');
 
-window.onload = () => {
-    button.style.display = "block";
-    menu.style.display = "flex";
-}
 
 // When you are NOT adding a new point or CLICKING a point but want to HOVER
 map.on('mouseenter', 'points-layer', (e) => {
@@ -383,27 +450,21 @@ function addPoint(e) {
 function editPoint(index) {
     const feature = geojson.features[index];
     if (!feature) return;
-
     const transaction = db.transaction("images", "readonly");
     const store = transaction.objectStore("images");
     const getRequest = store.get(feature.id);
-
     getRequest.onsuccess = function () {
         const imageBlob = getRequest.result?.data; // Access result only after onsuccess
         if (imageBlob) {
             imagePreview.src = imageBlob;
             imagePreview.style.display = 'block';
         }
-
         // Populate description field
         document.querySelector('input[name="description"]').value = feature.properties.description || "";
         button.style.display = 'none';
-
         entry.showModal();
-
         // Reset file input
         imageInput.value = '';
-
         // Update on submit
         replaceSubmitButton();
         const newSubmitButton = document.getElementById('submitButton');
@@ -430,7 +491,6 @@ function editPoint(index) {
                 // If no new file, just update the GeoJSON
                 map.getSource('points').setData(geojson);
             }
-
             localStorage.setItem('value', JSON.stringify(geojson));
             entry.close(); // Hide edit form
             imagePreview.style.display = 'none'; // Hide image preview
@@ -460,6 +520,7 @@ imageInput.addEventListener('change', function (event) {
     }
 });
 
+//CLICKING A POPUP
 map.on('click', 'points-layer', function(e) {
     if (text.style.display !== 'block') {
         const coordinates = e.lngLat;
@@ -479,16 +540,13 @@ map.on('click', 'points-layer', function(e) {
                     image = `<img src="${imageBlob}" style="width: 200px; display: block; " />`
                     const location = feature.properties.location;
                             const description = feature.properties.description || "No description";
-                            // Remove previous click popup
                             if (clickPopup) {
                                 clickPopup.remove();
                             }
-                            // Create new click popup
                             clickPopup = new mapboxgl.Popup()
                                 .setLngLat(coordinates)
                                 .setHTML(`
                                     <div class="popup">
-
                                         <p class="location_description margin">📍<i>${location}</i></p>
                                         ${image}
                                         <p class="location_description">${description}</p>
@@ -501,15 +559,13 @@ map.on('click', 'points-layer', function(e) {
                                     </div>
                                 `)
                                 .addTo(map);
-
-                            // Add event listeners for the buttons
+                            // Listeners for the buttons
                             setTimeout(() => {
                                 // Ensure the DOM has rendered before adding listeners
                                 document.getElementById(`edit-btn-${featureIndex}`).addEventListener('click', () => {
                                     replaceSubmitButton();
                                     const newSubmitButton = document.getElementById('submitButton');
                                     newSubmitButton.innerText = 'Edit';
-
                                     editPoint(featureIndex);
                                     exitButton.style.display = 'none';
                                 });
