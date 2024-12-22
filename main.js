@@ -11,13 +11,13 @@ window.msIndexedDB ||
 window.shimIndexedDB;
 
 let db;
-
+/*
 indexedDB.deleteDatabase("GeoJSONImagesDB");
 
-/*
 indexedDB.deleteDatabase("GeoJSONImagesDB").onsuccess = function () {
     console.log("IndexedDB deleted successfully.");
 };
+localStorage.clear();
 */
 
 const request = indexedDB.open("GeoJSONImagesDB", 1);
@@ -37,8 +37,6 @@ request.onsuccess = function (event) {
 request.onerror = function (event) {
     console.error("Error opening IndexedDB:", event.target.errorCode);
 };
-//localStorage.clear();
-
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw';
 
@@ -59,13 +57,11 @@ let geojson = {
                 ]
               };
 
-
 let currentLocation = {
                 "type": "FeatureCollection",
                 "features": [
                 ]
               };
-
 
 // Retrieve stored data from localStorage (if exists)
 let pointId = 0;
@@ -234,7 +230,7 @@ function updateNumberOfCountries() {
 }
 
 function deletePoint(index) {
-    console.log("INDEX", index);
+    console.log("index", index);
     const featureToDelete = geojson.features[index];
     console.log("featureToDelete", featureToDelete);
     const deletedCountry = featureToDelete.properties.country;
@@ -250,6 +246,7 @@ function deletePoint(index) {
     map.getSource('points').setData(geojson);
     localStorage.setItem('value', JSON.stringify(geojson));
     localStorage.setItem('idCount', JSON.stringify(pointId));
+    console.log("geojson.features AFTER DELETION",geojson.features);
     updateNumberOfCountries();
 }
 
@@ -326,12 +323,12 @@ console.log("E:", e);
                 indexLocation = 0;
             }
         }
-        console.log(data.features);
+        //console.log(data.features);
         location = data.features[indexLocation].properties.full_address;
-        console.log("location", location);
-        console.log("coordinates", coordinates);
+        //console.log("location", location);
+        //console.log("coordinates", coordinates);
         countryName = data.features[indexLocation].properties.context.country.name;
-        console.log("countryName", countryName);
+        //console.log("countryName", countryName);
         const newFeature = {
                 "type": "Feature",
                 "geometry": {
@@ -379,13 +376,14 @@ console.log("E:", e);
         entry.showModal();
     });
     replaceSubmitButton();
+    console.log("geojson.features", geojson.features);
     const newSubmitButton = document.getElementById('submitButton');
     newSubmitButton.innerText = 'Post';
     clearPreviousEntry();
     // Initialize description
     document.querySelector('input[name="description"]').value = description;
     map.getSource('points').setData(geojson);
-    console.log("Countries", countriesPost);
+    //console.log("Countries", countriesPost);
 
     // Make the entry box appear and the exit button
     exitButton.style.display = 'block';
@@ -519,36 +517,37 @@ const currentLocationButton = document.getElementById('currentLocationButton');
 const somewhereElseButton = document.getElementById('somewhereElseButton');
 const exitButton2 = document.querySelector('.exit-button2');
 
-
 // Event listener for the button
+let currentLocationListenerAdded = false;
 button.addEventListener('click', function () {
     button.style.display = 'none';
     confirmLocation.showModal();
-    currentLocationButton.addEventListener('click', () => {
-        confirmLocation.close();
-        button.style.display = "block";
-        //console.log("current location add");
-        const currentCoords = currentLocation.features[0].geometry.coordinates;
-        const simulatedEvent = {
-            lngLat: {
-            lng: currentCoords[0],
-            lat: currentCoords[1]
-            },
-            point: null, // Optional, only needed if you use `e.point` in your function
-            originalEvent: null, // Optional, only needed if you use `e.originalEvent`
-            type: "geolocate", // Optional, just for clarity
-            target: map, // Optional, the map object if needed
-            _defaultPrevented: false // Optional
-        };
-        addPoint(simulatedEvent);
-    });
+    if (!currentLocationListenerAdded) {
+        currentLocationButton.addEventListener('click', () => {
+            confirmLocation.close();
+            console.log("Before adding", geojson.features);
+            button.style.display = "block";
+            const currentCoords = currentLocation.features[0].geometry.coordinates;
+            const simulatedEvent = {
+                lngLat: {
+                    lng: currentCoords[0],
+                    lat: currentCoords[1]
+                },
+                point: null,
+                originalEvent: null,
+                type: "geolocate",
+                target: map,
+                _defaultPrevented: false
+            };
+            addPoint(simulatedEvent);
+        });
+        currentLocationListenerAdded = true;
+    }
     somewhereElseButton.addEventListener('click', () => {
         enablePointAdding();
-        //console.log("some where else add");
     });
     exitButton2.addEventListener('click', () => {
         event.preventDefault();
-        //console.log("exit  add");
         confirmLocation.close();
         button.style.display = "block";
     });
