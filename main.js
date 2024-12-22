@@ -484,6 +484,11 @@ function editPoint(index) {
 
 navigator.geolocation.getCurrentPosition(position => {
     const { latitude, longitude } = position.coords;
+    map.flyTo({
+        center: [longitude, latitude],
+        zoom: 3,
+        speed: 0.8
+    });
     console.log("CURRENT LOCATION", latitude, longitude);
     const point = {
                    "type": "Feature",
