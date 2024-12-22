@@ -11,6 +11,15 @@ window.msIndexedDB ||
 window.shimIndexedDB;
 
 let db;
+
+indexedDB.deleteDatabase("GeoJSONImagesDB");
+
+/*
+indexedDB.deleteDatabase("GeoJSONImagesDB").onsuccess = function () {
+    console.log("IndexedDB deleted successfully.");
+};
+*/
+
 const request = indexedDB.open("GeoJSONImagesDB", 1);
 
 request.onupgradeneeded = function (event) {
@@ -28,6 +37,8 @@ request.onsuccess = function (event) {
 request.onerror = function (event) {
     console.error("Error opening IndexedDB:", event.target.errorCode);
 };
+//localStorage.clear();
+
 
 mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltOGhqd2EifQ.NF_TfdXji0T4Mn-qDeyzQw';
 
@@ -60,7 +71,6 @@ let currentLocation = {
 let pointId = 0;
 let countriesPost = [];
 let stampList = [];
-//localStorage.clear();
 const storedId = localStorage.getItem('idCount');
 const storedGeojson = localStorage.getItem('value');
 const storedCountries = localStorage.getItem('countries_stored');
@@ -117,6 +127,7 @@ function addPointsLayer(map, geojson) {
     }
 }
 
+
 function addCurrentLocation(map, currentLocation) {
     // Check if the source already exists to avoid errors
     if (!map.getSource('currentPoint')) {
@@ -127,20 +138,20 @@ function addCurrentLocation(map, currentLocation) {
     }
     // Check if the layer already exists to avoid duplication
     if (!map.getLayer('current-points-layer')) {
-        map.loadImage('./pointerface2.png', (error, image) => {
+        map.loadImage('./pointerface7.png', (error, image) => {
             if (error) throw error;
-            if (!map.hasImage('custom-pointer2')) {
-                map.addImage('custom-pointer2', image);
+            if (!map.hasImage('custom-pointer3')) {
+                map.addImage('custom-pointer3', image);
             }
             map.addLayer({
                 id: 'current-points-layer',
                 type: 'symbol',
                 source: 'currentPoint',
                 layout: {
-                    'icon-image': 'custom-pointer2',
-                    'icon-size': 0.15,
+                    'icon-image': 'custom-pointer3',
+                    'icon-size': 0.2,
                     'icon-allow-overlap': true,
-                    'icon-offset': [40, -200]
+                    'icon-offset': [25, -185]
                 }
             });
         });
@@ -148,7 +159,6 @@ function addCurrentLocation(map, currentLocation) {
 }
 
 // Add points when the map initially loads and re-add points whenever the style is reloaded
-
 const menu = document.querySelector('.menu');
 const button = document.getElementById('customButton');
 
@@ -157,37 +167,6 @@ map.on('load', () => {
 });
 map.on('style.load', () => {
     addPointsLayer(map, geojson);
-    button.style.display = "block";
-    menu.style.display = "flex";
-});
-
-navigator.geolocation.getCurrentPosition(position => {
-    const { latitude, longitude } = position.coords;
-    console.log("CURRENT LOCATION", latitude, longitude);
-    const point = {
-                                  "type": "Feature",
-                                  "geometry": {
-                                      "type": "Point",
-                                      "coordinates": [longitude, latitude]
-                                  }
-                              };
-    if (currentLocation.features.length === 0) {
-   currentLocation.features.push(point);
-   };
-   console.log(currentLocation.features);
-   if (currentLocation.features.length > 0) {
-       if (map.isStyleLoaded()) {
-              addCurrentLocation(map, currentLocation);
-              } else {
-
-       map.on('style.load', () => {
-       addCurrentLocation(map, currentLocation);
-       });
-       map.on('load', () => {
-              addCurrentLocation(map, currentLocation);
-       });
-   }
-   }
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
@@ -255,7 +234,9 @@ function updateNumberOfCountries() {
 }
 
 function deletePoint(index) {
+    console.log("INDEX", index);
     const featureToDelete = geojson.features[index];
+    console.log("featureToDelete", featureToDelete);
     const deletedCountry = featureToDelete.properties.country;
     geojson.features.splice(index, 1);
     const deletedIndex = countriesPost.findIndex(country => country.name === deletedCountry);
@@ -322,6 +303,7 @@ function stampNotify(stamp) {
 };
 
 function addPoint(e) {
+console.log("E:", e);
     let description = "";
     let location = "";
     let countryName = "";
@@ -412,10 +394,11 @@ function addPoint(e) {
         // Update the latest input for the image and the description
         description = document.querySelector('input[name="description"]').value;
         const lastFeature = geojson.features[geojson.features.length - 1];
+        console.log("lastFeature", lastFeature);
         lastFeature.properties.description = description;
         const file = imageInput.files[0];
-
         if (file) {
+            console.log("Image saved");
             const reader = new FileReader();
             reader.onload = function (e) {
                 const imageBlob = e.target.result;
@@ -501,10 +484,74 @@ function editPoint(index) {
     };
 }
 
+navigator.geolocation.getCurrentPosition(position => {
+    const { latitude, longitude } = position.coords;
+    console.log("CURRENT LOCATION", latitude, longitude);
+    const point = {
+                   "type": "Feature",
+                   "geometry": {
+                       "type": "Point",
+                       "coordinates": [longitude, latitude]
+                       }
+                   };
+    if (currentLocation.features.length === 0) {
+   currentLocation.features.push(point);
+   };
+   console.log(currentLocation.features);
+   if (currentLocation.features.length > 0) {
+       if (map.isStyleLoaded()) {
+              addCurrentLocation(map, currentLocation);
+              } else {
+       map.on('style.load', () => {
+       addCurrentLocation(map, currentLocation);
+       });
+       map.on('load', () => {
+              addCurrentLocation(map, currentLocation);
+       });
+   }
+   }
+});
+
+//addPointsLayer(map, geojson);
+
+const confirmLocation = document.getElementById('confirmLocation');
+const currentLocationButton = document.getElementById('currentLocationButton');
+const somewhereElseButton = document.getElementById('somewhereElseButton');
+const exitButton2 = document.querySelector('.exit-button2');
+
+
 // Event listener for the button
 button.addEventListener('click', function () {
     button.style.display = 'none';
-    enablePointAdding();
+    confirmLocation.showModal();
+    currentLocationButton.addEventListener('click', () => {
+        confirmLocation.close();
+        button.style.display = "block";
+        //console.log("current location add");
+        const currentCoords = currentLocation.features[0].geometry.coordinates;
+        const simulatedEvent = {
+            lngLat: {
+            lng: currentCoords[0],
+            lat: currentCoords[1]
+            },
+            point: null, // Optional, only needed if you use `e.point` in your function
+            originalEvent: null, // Optional, only needed if you use `e.originalEvent`
+            type: "geolocate", // Optional, just for clarity
+            target: map, // Optional, the map object if needed
+            _defaultPrevented: false // Optional
+        };
+        addPoint(simulatedEvent);
+    });
+    somewhereElseButton.addEventListener('click', () => {
+        enablePointAdding();
+        //console.log("some where else add");
+    });
+    exitButton2.addEventListener('click', () => {
+        event.preventDefault();
+        //console.log("exit  add");
+        confirmLocation.close();
+        button.style.display = "block";
+    });
 });
 
 imageInput.addEventListener('change', function (event) {
@@ -605,10 +652,11 @@ discardButton.addEventListener('click', () => {
     imagePreview.src = '';
     imagePreview.style.display = 'none';
     imageInput.value = ''; // Clear file input
-
         entry.close();
         button.style.display = 'block';
+        console.log("Feature being deleted", geojson.features.length-1);
         deletePoint(geojson.features.length-1);
+        console.log("All features", geojson.features);
         updateNumberOfPosts();
 })
 
