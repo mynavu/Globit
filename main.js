@@ -13,7 +13,6 @@ window.shimIndexedDB;
 let db;
 /*
 indexedDB.deleteDatabase("GeoJSONImagesDB");
-
 indexedDB.deleteDatabase("GeoJSONImagesDB").onsuccess = function () {
     console.log("IndexedDB deleted successfully.");
 };
@@ -94,16 +93,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Function to add GeoJSON source and layer for points
 function addPointsLayer(map, geojson) {
-    // Check if the source already exists to avoid errors
     if (!map.getSource('points')) {
         map.addSource('points', {
             type: 'geojson',
             data: geojson
         });
     }
-    // Check if the layer already exists to avoid duplication
     if (!map.getLayer('points-layer')) {
-        map.loadImage('./pointer.png', (error, image) => {
+        map.loadImage('./pointer1.png', (error, image) => {
             if (error) throw error;
             if (!map.hasImage('custom-pointer')) {
                 map.addImage('custom-pointer', image);
@@ -123,7 +120,6 @@ function addPointsLayer(map, geojson) {
     }
 }
 
-
 function addCurrentLocation(map, currentLocation) {
     // Check if the source already exists to avoid errors
     if (!map.getSource('currentPoint')) {
@@ -132,7 +128,6 @@ function addCurrentLocation(map, currentLocation) {
             data: currentLocation
         });
     }
-    // Check if the layer already exists to avoid duplication
     if (!map.getLayer('current-points-layer')) {
         map.loadImage('./pointerface7.png', (error, image) => {
             if (error) throw error;
@@ -154,15 +149,60 @@ function addCurrentLocation(map, currentLocation) {
     }
 }
 
+navigator.geolocation.getCurrentPosition(position => {
+    const { latitude, longitude } = position.coords;
+    map.flyTo({
+        center: [longitude, latitude],
+        zoom: 3,
+        speed: 0.8
+    });
+    //console.log("CURRENT LOCATION", latitude, longitude);
+    const point = {
+                   "type": "Feature",
+                   "geometry": {
+                       "type": "Point",
+                       "coordinates": [longitude, latitude]
+                       }
+                   };
+    if (currentLocation.features.length === 0) {
+   currentLocation.features.push(point);
+   };
+   //console.log(currentLocation.features);
+
+   if (currentLocation.features.length > 0) {
+       if (map.isStyleLoaded()) {
+              addCurrentLocation(map, currentLocation);
+       }
+       /*
+
+       else {
+           map.on('style.load', () => {
+               addCurrentLocation(map, currentLocation);
+           });
+           map.on('load', () => {
+               addCurrentLocation(map, currentLocation);
+           });
+       }
+       */
+   }
+
+});
+
 // Add points when the map initially loads and re-add points whenever the style is reloaded
 const menu = document.querySelector('.menu');
 const button = document.getElementById('customButton');
 
 map.on('load', () => {
     addPointsLayer(map, geojson);
+    if (currentLocation.features.length) {
+        addCurrentLocation(map, currentLocation);
+    };
 });
 map.on('style.load', () => {
     addPointsLayer(map, geojson);
+    if (currentLocation.features.length) {
+        addCurrentLocation(map, currentLocation);
+    }
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
@@ -178,7 +218,6 @@ const entry = document.getElementById('entry');
 const text = document.querySelector('.text');
 const imageInput = document.getElementById('imageInput');
 const imagePreview = document.getElementById('imagePreview');
-
 
 // When you are NOT adding a new point or CLICKING a point but want to HOVER
 map.on('mouseenter', 'points-layer', (e) => {
@@ -226,13 +265,13 @@ const numberOfCountries = document.querySelector('.numberOfCountries');
 function updateNumberOfCountries() {
     numberOfCountries.innerHTML = `Countries Visited: ${countriesPost.length}`;
     localStorage.setItem('countries_stored', JSON.stringify(countriesPost));
-    console.log("COUNTRIES STORED:", localStorage.getItem('countries_stored'));
+    //console.log("COUNTRIES STORED:", localStorage.getItem('countries_stored'));
 }
 
 function deletePoint(index) {
-    console.log("index", index);
+    //console.log("index", index);
     const featureToDelete = geojson.features[index];
-    console.log("featureToDelete", featureToDelete);
+    //console.log("featureToDelete", featureToDelete);
     const deletedCountry = featureToDelete.properties.country;
     geojson.features.splice(index, 1);
     const deletedIndex = countriesPost.findIndex(country => country.name === deletedCountry);
@@ -246,14 +285,13 @@ function deletePoint(index) {
     map.getSource('points').setData(geojson);
     localStorage.setItem('value', JSON.stringify(geojson));
     localStorage.setItem('idCount', JSON.stringify(pointId));
-    console.log("geojson.features AFTER DELETION",geojson.features);
     updateNumberOfCountries();
 }
 
 const clearPreviousEntry = () => {
      imagePreview.src = '';
      imagePreview.style.display = 'none';
-     imageInput.value = ''; // Reset file input
+     imageInput.value = '';
 }
 
 const replaceSubmitButton = () => {
@@ -482,39 +520,6 @@ function editPoint(index) {
     };
 }
 
-navigator.geolocation.getCurrentPosition(position => {
-    const { latitude, longitude } = position.coords;
-    map.flyTo({
-        center: [longitude, latitude],
-        zoom: 3,
-        speed: 0.8
-    });
-    console.log("CURRENT LOCATION", latitude, longitude);
-    const point = {
-                   "type": "Feature",
-                   "geometry": {
-                       "type": "Point",
-                       "coordinates": [longitude, latitude]
-                       }
-                   };
-    if (currentLocation.features.length === 0) {
-   currentLocation.features.push(point);
-   };
-   console.log(currentLocation.features);
-   if (currentLocation.features.length > 0) {
-       if (map.isStyleLoaded()) {
-              addCurrentLocation(map, currentLocation);
-              } else {
-       map.on('style.load', () => {
-       addCurrentLocation(map, currentLocation);
-       });
-       map.on('load', () => {
-              addCurrentLocation(map, currentLocation);
-       });
-   }
-   }
-});
-
 //addPointsLayer(map, geojson);
 
 const confirmLocation = document.getElementById('confirmLocation');
@@ -530,7 +535,7 @@ button.addEventListener('click', function () {
     if (!currentLocationListenerAdded) {
         currentLocationButton.addEventListener('click', () => {
             confirmLocation.close();
-            console.log("Before adding", geojson.features);
+            //console.log("Before adding", geojson.features);
             button.style.display = "block";
             const currentCoords = currentLocation.features[0].geometry.coordinates;
             const simulatedEvent = {
@@ -653,15 +658,11 @@ cancelButton.addEventListener('click', () => {
 
 discardButton.addEventListener('click', () => {
     confirmCloseButton.close();
-    imagePreview.src = '';
-    imagePreview.style.display = 'none';
-    imageInput.value = ''; // Clear file input
-        entry.close();
-        button.style.display = 'block';
-        console.log("Feature being deleted", geojson.features.length-1);
-        deletePoint(geojson.features.length-1);
-        console.log("All features", geojson.features);
-        updateNumberOfPosts();
+    clearPreviousEntry();
+    entry.close();
+    button.style.display = 'block';
+    deletePoint(geojson.features.length-1);
+    updateNumberOfPosts();
 })
 
 /* ---------------------------------------------------------------------------------------------------------------------------------- */
@@ -691,24 +692,13 @@ map.on('mousedown',() => {
     userInteracting = true;
 });
 
-map.on('mouseup', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-
-map.on('dragend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-
-map.on('pitchend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
-map.on('rotateend', () => {
-    userInteracting = false;
-    spinGlobe();
-});
+const events = ['mouseup', 'dragend', 'pitchend', 'rotateend'];
+events.forEach((event) => {
+    map.on(event, () => {
+        userInteracting = false;
+        spinGlobe();
+    })
+})
 
     // When animation is complete, start spinning if there is no ongoing interaction
 map.on('moveend', () => {
@@ -744,7 +734,6 @@ document.addEventListener('DOMContentLoaded', () => {
         map.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
 
         const zoomButton = document.querySelector('.mapboxgl-ctrl-fullscreen');
-
         const searchBar = document.querySelector('.mapboxgl-ctrl-geocoder');
 
         zoomButton.addEventListener("click", () => {
@@ -799,18 +788,10 @@ function lightMode() {
     if (savedState !== null) {
       modeButton.checked = JSON.parse(savedState);
     };
-    if (modeButton.checked) {
-        darkMode();
-    } else {
-        lightMode();
-    }
+    modeButton.checked ? darkMode() : lightMode();
 
 modeButton.addEventListener('change', () => {
-    if (modeButton.checked) {
-        darkMode();
-    } else {
-        lightMode();
-    }
+    modeButton.checked ? darkMode() : lightMode();
 });
 
 // SETTINGS
@@ -818,11 +799,7 @@ const settingsButton = document.querySelector('.menuFriend');
 const customization = document.querySelector('.customization');
 
 settingsButton.addEventListener("click", () => {
-    if (customization.style.display === "none" || customization.style.display === "") {
-    customization.style.display = "flex";
-    } else {
-    customization.style.display = "none";
-    }
+    customization.style.display = (customization.style.display === "none" || customization.style.display === "") ? "flex" : "none";
 })
 
 /* ----------------------------------------------------------------------------------------------------------------------------------
@@ -839,11 +816,7 @@ settingsButton.addEventListener("click", () => {
       const allCountries = document.querySelector('.allCountries');
 
       settingsButton.addEventListener("click", () => {
-          if (customization.style.display === "none" || customization.style.display === "") {
-              customization.style.display = "flex";
-          } else {
-              customization.style.display = "none";
-          }
+          customization.style.display = (customization.style.display === "none" || customization.style.display === "") ? "flex" : "none";
       });
 
     //DARK MODE LIGHT MODE
@@ -871,18 +844,10 @@ settingsButton.addEventListener("click", () => {
       modeButton.checked = JSON.parse(savedState);
     };
 
-    if (modeButton.checked) {
-        darkMode();
-    } else {
-        lightMode();
-    }
+    modeButton.checked ? darkMode() : lightMode();
 
     modeButton.addEventListener('change', () => {
-        if (modeButton.checked) {
-            darkMode();
-        } else {
-            lightMode();
-        }
+        modeButton.checked ? darkMode() : lightMode();
     });
 
 const storedCountries = localStorage.getItem('countries_stored');
@@ -960,7 +925,6 @@ let stampList = [];
           }
 
           if (storedStamps) {
-              console.log("YES STAMP STORED")
               stampList = JSON.parse(storedStamps);
               if (stampList.length > 0) {
               credits.style.display = "block";
@@ -1144,11 +1108,7 @@ if (storedCountries) {
       const customization = document.querySelector('.customization');
 
       settingsButton.addEventListener("click", () => {
-          if (customization.style.display === "none" || customization.style.display === "") {
-              customization.style.display = "flex";
-          } else {
-              customization.style.display = "none";
-          }
+          customization.style.display = (customization.style.display === "none" || customization.style.display === "") ? "flex" : "none";
       });
 
     //DARK MODE LIGHT MODE
@@ -1176,18 +1136,10 @@ if (storedCountries) {
       modeButton.checked = JSON.parse(savedState);
     };
 
-    if (modeButton.checked) {
-        darkMode();
-    } else {
-        lightMode();
-    }
+    modeButton.checked ? darkMode() : lightMode();
 
     modeButton.addEventListener('change', () => {
-        if (modeButton.checked) {
-            darkMode();
-        } else {
-            lightMode();
-        }
+        modeButton.checked ? darkMode() : lightMode();
     });
 }
 
