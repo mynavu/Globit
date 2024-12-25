@@ -1506,21 +1506,37 @@ bottom: 70px;
     width: auto;
   }
 
+  .grid, .grid2 {
+    display: flex !important;
+    justify-content: center !important;
+    grid-template-columns: unset !important;
+  }
+
+
   .rightbar, .rightbar2 {
-    /*
     background: red;
-    */
+    grid-column: unset;
+    display: none !important;
+  }
+
+  .mainbar, .mainbar2 {
+  /*
+  background: blue;
+  */
+  grid-column: unset !important;
+  align-items: center !important;
   }
 
   .post, .postReminder {
-    width: 250px !important;
-    margin-right: 90px;
+    width: 80% !important;
+    margin-right: 0px;
   }
 
   .stampsCollection, .countriesCollection {
-    width: 250px;
-    margin-right: 90px;
+    width: 80%;
+    margin-right: 0px;
   }
+
   .pfp2 {
     width: 60px !important;
     height: 60px !important;
@@ -1541,13 +1557,6 @@ bottom: 70px;
   .stampsCollection h4, .countriesCollection h4 {
     font-size: 12px;
     text-align: center;
-  }
-
-  .mainbar, .mainbar2 {
-  margin-left: 0px;
-  /*
-  background: blue;
-  */
   }
 
 }
