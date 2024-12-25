@@ -269,9 +269,7 @@ function updateNumberOfCountries() {
 }
 
 function deletePoint(index) {
-    //console.log("index", index);
     const featureToDelete = geojson.features[index];
-    //console.log("featureToDelete", featureToDelete);
     const deletedCountry = featureToDelete.properties.country;
     geojson.features.splice(index, 1);
     const deletedIndex = countriesPost.findIndex(country => country.name === deletedCountry);
@@ -338,7 +336,7 @@ function stampNotify(stamp) {
 };
 
 function addPoint(e) {
-console.log("E:", e);
+    //console.log("E:", e);
     let description = "";
     let location = "";
     let countryName = "";
@@ -414,7 +412,7 @@ console.log("E:", e);
         entry.showModal();
     });
     replaceSubmitButton();
-    console.log("geojson.features", geojson.features);
+    //console.log("geojson.features", geojson.features);
     const newSubmitButton = document.getElementById('submitButton');
     newSubmitButton.innerText = 'Post';
     clearPreviousEntry();
@@ -430,11 +428,9 @@ console.log("E:", e);
         // Update the latest input for the image and the description
         description = document.querySelector('input[name="description"]').value;
         const lastFeature = geojson.features[geojson.features.length - 1];
-        console.log("lastFeature", lastFeature);
         lastFeature.properties.description = description;
         const file = imageInput.files[0];
         if (file) {
-            console.log("Image saved");
             const reader = new FileReader();
             reader.onload = function (e) {
                 const imageBlob = e.target.result;
@@ -455,7 +451,6 @@ console.log("E:", e);
             };
             reader.readAsDataURL(file);
         } else {
-            // Update GeoJSON even if no file is uploaded
             alert("You must upload an image.");
             return;
         }
@@ -473,7 +468,7 @@ function editPoint(index) {
     const store = transaction.objectStore("images");
     const getRequest = store.get(feature.id);
     getRequest.onsuccess = function () {
-        const imageBlob = getRequest.result?.data; // Access result only after onsuccess
+        const imageBlob = getRequest.result?.data;
         if (imageBlob) {
             imagePreview.src = imageBlob;
             imagePreview.style.display = 'block';
@@ -490,11 +485,9 @@ function editPoint(index) {
         newSubmitButton.addEventListener('click', function () {
             const newDescription = document.querySelector('input[name="description"]').value;
             button.style.display = 'block';
-            // Update description
             if (newDescription) {
                 feature.properties.description = newDescription;
             }
-            // Check if a new file was uploaded
             const file = imageInput.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -507,7 +500,6 @@ function editPoint(index) {
                 };
                 reader.readAsDataURL(file);
             } else {
-                // If no new file, just update the GeoJSON
                 map.getSource('points').setData(geojson);
             }
             localStorage.setItem('value', JSON.stringify(geojson));
@@ -535,7 +527,6 @@ button.addEventListener('click', function () {
     if (!currentLocationListenerAdded) {
         currentLocationButton.addEventListener('click', () => {
             confirmLocation.close();
-            //console.log("Before adding", geojson.features);
             button.style.display = "block";
             const currentCoords = currentLocation.features[0].geometry.coordinates;
             const simulatedEvent = {
@@ -627,7 +618,7 @@ map.on('click', 'points-layer', function(e) {
                                 });
                                 document.getElementById(`delete-btn-${featureIndex}`).addEventListener('click', () => {
                                     deletePoint(featureIndex);
-                                    clickPopup.remove(); // Close popup after deleting
+                                    clickPopup.remove();
                                     updateNumberOfPosts();
                                 });
                             }, 100); // Short delay to ensure DOM availability
@@ -699,8 +690,7 @@ events.forEach((event) => {
         spinGlobe();
     })
 })
-
-    // When animation is complete, start spinning if there is no ongoing interaction
+  // When animation is complete, spin again
 map.on('moveend', () => {
     spinGlobe();
 });

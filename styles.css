@@ -870,7 +870,7 @@ body.stamps {
   overflow-x: hidden;
 }
 
-.grid {
+.grid, .grid2 {
   display: grid;
   grid-template-columns: 13% 60% 27%;
 }
@@ -1325,20 +1325,35 @@ body.home {
     width: auto;
   }
 
+  .grid, .grid2 {
+    display: flex !important;
+    justify-content: center !important;
+    grid-template-columns: unset !important;
+  }
+
+
   .rightbar, .rightbar2 {
-    /*
     background: red;
-    */
+    grid-column: unset;
+    display: none !important;
+  }
+
+  .mainbar, .mainbar2 {
+  /*
+  background: blue;
+  */
+  grid-column: unset !important;
+  align-items: center !important;
   }
 
   .post, .postReminder {
-    width: 250px !important;
-    margin-right: 80px;
+    width: 80% !important;
+    margin-right: 0px;
   }
 
   .stampsCollection, .countriesCollection {
-    width: 200px;
-    margin-right: 15px;
+    width: 80%;
+    margin-right: 0px;
   }
   .pfp2 {
     width: 60px !important;
@@ -1360,13 +1375,6 @@ body.home {
   .stampsCollection h4, .countriesCollection h4 {
     font-size: 12px;
     text-align: center;
-  }
-
-  .mainbar, .mainbar2 {
-  margin-right: 80px;
-  /*
-  background: blue;
-  */
   }
 
 }
@@ -1647,11 +1655,6 @@ bottom: 70px;
 .leftbar2 {
   height: auto;
   grid-column: 1;
-}
-
-.grid2 {
-  display: grid;
-  grid-template-columns: 13% 60% 27%;
 }
 
 body::-webkit-scrollbar {
