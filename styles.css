@@ -17,6 +17,30 @@ body.index {
   overflow: hidden;
 }
 
+.weatherIcon {
+    font-size: 15px;
+}
+
+.weatherDisplay {
+    display: none;
+    font-size: 15px;
+    height: 35px;
+    width: auto;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    position: absolute;
+    right: 60px;
+    bottom: 30px;
+    background: white;
+    z-index: 3;
+    border: black solid 3px;
+    border-radius: 20px;
+    box-shadow: 2px 2px 0 0px black;
+
+}
+
 html * {
   font-family: "Noto Sans Display", sans-serif !important;
 }
@@ -617,6 +641,7 @@ a {
 .bi-trash-fill {
   margin-left: 5px;
 }
+
 
 #customButton {
   position: absolute;
