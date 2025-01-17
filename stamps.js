@@ -17,6 +17,9 @@ const settingsButton = document.querySelector('.menuFriend');
     const backgroundColor = document.querySelector(".background");
     const savedState = localStorage.getItem("checkboxState");
 
+const menu = document.querySelector('.menu');
+menu.style.display = "flex";
+
     function darkMode() {
         localStorage.setItem('checkboxState', JSON.stringify(modeButton.checked));
         mode.innerText = "Mode: Dark";

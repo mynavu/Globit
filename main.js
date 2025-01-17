@@ -38,8 +38,6 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltO
 
 const submitButton = document.getElementById('submitButton');
 
-const header = document.querySelector(".header");
-
 let map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mynavu/cm3std23v009l01sd8csudg7h', // Light mode
@@ -226,7 +224,7 @@ navigator.geolocation.getCurrentPosition(position => {
 
 // Add points when the map initially loads and re-add points whenever the style is reloaded
 const menu = document.querySelector('.menu');
-const button = document.getElementById('customButton');
+const customButton = document.getElementById('customButton');
 
 map.on('load', () => {
     addPointsLayer(map, geojson);
@@ -236,14 +234,15 @@ map.on('load', () => {
 });
 
 map.on('style.load', () => {
-    menu.style.display = "none";
-    customButton.style.display = "none";
     addPointsLayer(map, geojson);
     if (currentLocation.features.length) {
         addCurrentLocation(map, currentLocation);
     }
-    menu.style.display = "flex";
-    customButton.style.display = "flex";
+    setTimeout(()=> {
+        menu.style.display = "flex";
+        customButton.style.display = "flex";
+    }, 500)
+
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
@@ -498,7 +497,7 @@ function addPoint(e) {
         // Hide entry form and reset UI
         entry.close();
         clearPreviousEntry();
-        button.style.display = 'block';
+        customButton.style.display = 'block';
     });
 }
 
@@ -516,7 +515,7 @@ function editPoint(index) {
         }
         // Populate description field
         document.querySelector('input[name="description"]').value = feature.properties.description || "";
-        button.style.display = 'none';
+        customButton.style.display = 'none';
         entry.showModal();
         // Reset file input
         imageInput.value = '';
@@ -525,7 +524,7 @@ function editPoint(index) {
         const newSubmitButton = document.getElementById('submitButton');
         newSubmitButton.addEventListener('click', function () {
             const newDescription = document.querySelector('input[name="description"]').value;
-            button.style.display = 'block';
+            customButton.style.display = 'block';
             if (newDescription) {
                 feature.properties.description = newDescription;
             }
@@ -562,14 +561,14 @@ const exitButton2 = document.querySelector('.exit-button2');
 
 // Event listener for the button
 let currentLocationListenerAdded = false;
-button.addEventListener('click', function () {
-    button.style.display = 'none';
+customButton.addEventListener('click', function () {
+    customButton.style.display = 'none';
     confirmLocation.showModal();
     if (!currentLocationListenerAdded) {
         currentLocationButton.addEventListener('click', () => {
             if (locationAccess) {
                 confirmLocation.close();
-                button.style.display = "block";
+                customButton.style.display = "block";
                 const currentCoords = currentLocation.features[0].geometry.coordinates;
                 const simulatedEvent = {
                     lngLat: {
@@ -585,7 +584,7 @@ button.addEventListener('click', function () {
                 addPoint(simulatedEvent);
             } else {
             alert("Please enable location services in your browser settings to use this feature. Refresh the page once enabled.");
-            button.style.display = "block";
+            customButton.style.display = "block";
             };
         });
         currentLocationListenerAdded = true;
@@ -596,7 +595,7 @@ button.addEventListener('click', function () {
     exitButton2.addEventListener('click', () => {
         event.preventDefault();
         confirmLocation.close();
-        button.style.display = "block";
+        customButton.style.display = "block";
     });
 });
 
@@ -697,7 +696,7 @@ discardButton.addEventListener('click', () => {
     confirmCloseButton.close();
     clearPreviousEntry();
     entry.close();
-    button.style.display = 'block';
+    customButton.style.display = 'block';
     deletePoint(geojson.features.length-1);
     updateNumberOfPosts();
 })

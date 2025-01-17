@@ -53,7 +53,7 @@ html * {
   z-index: 2;
 }
 
-.header {
+header {
   height: 80px;
   width: 100%;
   background: -webkit-linear-gradient(top, #ffad7a 0%, var(--orange) 50%);
@@ -651,7 +651,7 @@ a {
   width: 50px;
   z-index: 1;
   cursor: pointer;
-  display: block;
+  display: none;
 }
 
 #customButton i:hover {
@@ -847,6 +847,7 @@ a {
   left: 20px;
   top: 100px;
   justify-content: space-around;
+  display: none;
 }
 
 .Icon {

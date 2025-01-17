@@ -26,6 +26,9 @@ const descriptionDisplay = document.querySelector(".descriptionDisplay");
 const locationDisplay = document.querySelector(".locationDisplay");
 const mainbar2 = document.querySelector(".mainbar2");
 
+const menu = document.querySelector('.menu');
+menu.style.display = "flex";
+
 document.addEventListener('DOMContentLoaded', () => {
 if (storedCountries) {
               let countriesPost = JSON.parse(storedCountries);
