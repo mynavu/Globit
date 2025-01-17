@@ -53,7 +53,7 @@ html * {
   z-index: 2;
 }
 
-header {
+.header {
   height: 80px;
   width: 100%;
   background: -webkit-linear-gradient(top, #ffad7a 0%, var(--orange) 50%);

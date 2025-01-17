@@ -38,6 +38,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoibXluYXZ1IiwiYSI6ImNtM3NzaWhpejAxM3Qya29tcTltO
 
 const submitButton = document.getElementById('submitButton');
 
+const header = document.querySelector(".header");
+
 let map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mynavu/cm3std23v009l01sd8csudg7h', // Light mode
@@ -232,11 +234,16 @@ map.on('load', () => {
         addCurrentLocation(map, currentLocation);
     };
 });
+
 map.on('style.load', () => {
+    menu.style.display = "none";
+    customButton.style.display = "none";
     addPointsLayer(map, geojson);
     if (currentLocation.features.length) {
         addCurrentLocation(map, currentLocation);
     }
+    menu.style.display = "flex";
+    customButton.style.display = "flex";
 });
 
 const numberOfPosts = document.querySelector('.numberOfPosts');
